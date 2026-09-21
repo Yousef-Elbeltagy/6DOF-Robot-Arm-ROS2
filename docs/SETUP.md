@@ -75,46 +75,92 @@ sudo apt install -y \
 
 ## 5. Clone the repository
 
-```bash
-mkdir -p ~/robot_arm_ws/src
-cd ~/robot_arm_ws/src
+The repository itself is the colcon workspace and already contains a `src/` directory:
 
-git clone https://github.com/Yousef-Elbeltagy/6DOF-Robot-Arm-ROS2.git
+```bash
+cd ~
+git clone https://github.com/Yousef-Elbeltagy/6DOF-Robot-Arm-ROS2.git robot_arm_ws
+cd ~/robot_arm_ws
 ```
 
-If the repository is structured with the ROS packages directly under the repository root, move/copy those packages into `~/robot_arm_ws/src` or use the repository itself as the `src` content.
+Expected layout:
+
+```text
+~/robot_arm_ws/
+├── src/
+├── scripts/
+├── config/
+├── docs/
+└── README.md
+```
+
+Do not clone the complete repository into `~/robot_arm_ws/src`.
 
 ## 6. Install package dependencies
+
+Recommended:
+
+```bash
+cd ~/robot_arm_ws
+bash scripts/setup_dependencies.sh
+```
+
+Or manually:
 
 ```bash
 source /opt/ros/humble/setup.bash
 cd ~/robot_arm_ws
-
-rosdep install \
-  --from-paths src \
-  --ignore-src \
-  -r \
-  -y \
-  --rosdistro humble
+rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
 ```
 
 ## 7. Build
+
+Recommended:
+
+```bash
+cd ~/robot_arm_ws
+bash scripts/build_workspace.sh
+```
+
+Or manually:
 
 ```bash
 cd ~/robot_arm_ws
 source /opt/ros/humble/setup.bash
 colcon build --symlink-install
-```
-
-Source the workspace:
-
-```bash
 source ~/robot_arm_ws/install/setup.bash
 ```
 
-## 8. Main project components
+## 8. Restore GUI configuration
 
-The original workspace includes packages for:
+```bash
+cp ~/robot_arm_ws/config/robot_arm_saved_poses.json ~/robot_arm_saved_poses.json
+cp ~/robot_arm_ws/config/robot_arm_tcp_config.json ~/robot_arm_tcp_config.json
+```
+
+## 9. Verify the environment
+
+```bash
+cd ~/robot_arm_ws
+bash scripts/check_system.sh
+```
+
+The public repository was validated on the development machine with all environment checks passing.
+
+## 10. Run the project
+
+```bash
+cd ~/robot_arm_ws
+bash scripts/start_robot.sh
+```
+
+The launcher starts Gazebo Classic, waits for the arm and gripper controllers, starts MoveIt, opens RViz, and launches the custom Tkinter GUI.
+
+The public repository was build-tested and launch-tested after publication.
+
+## 11. Main project components
+
+Important packages include:
 
 ```text
 robot_arm_with_gripper_urdf
@@ -129,23 +175,7 @@ small_jig_urdf
 IFRA_LinkAttacher
 ```
 
-## 9. Run the project
-
-The original development system used a convenience startup script named:
-
-```text
-start_robot.sh
-```
-
-Once that script is included in the repository, it can be run with:
-
-```bash
-bash ~/start_robot.sh
-```
-
-Alternatively, the individual ROS 2 launch files can be started manually from the appropriate packages.
-
-## 10. Useful checks
+## 12. Useful checks
 
 Controllers:
 
@@ -169,4 +199,6 @@ timeout 3 ros2 run tf2_ros tf2_echo link_6 gripper_base
 
 - The project was developed on Gazebo Classic 11 rather than modern Gz Sim.
 - The simulated jig attach/detach system uses a modified IFRA LinkAttacher implementation.
+- `warehouse_ros_mongo` is not required for the supported planning/simulation workflow.
+- Native SolidWorks and neutral STEP CAD packages are available under `cad/`.
 - The robot is a development/simulation project and not a certified industrial safety system.
