@@ -1,343 +1,302 @@
 # Sequence Programming & Execution
 
-The **Sequence Controller** is one of the most important software features in this project. It turned the robot from a manually jogged simulation into a programmable robotic system capable of executing ordered multi-step routines through the custom GUI.
+The **Sequence Controller** is a dedicated robot-programming layer in this project. It turns taught/saved poses into ordered motion programs and combines robot motion with process logic, digital I/O, gripper actions, blending, and execution control.
 
-It was also a major engineering milestone on the path toward the later automatic jig-placement system.
-
----
-
-## Why I built it
-
-Manual jogging is useful for teaching and testing positions, but an industrial robot needs repeatable motion programs.
-
-The goal of the sequence system was to let an operator:
-
-1. teach or save useful robot poses,
-2. arrange those poses into an ordered program,
-3. choose how the robot behaves at each waypoint,
-4. combine arm motion with digital I/O and gripper actions,
-5. execute the complete routine through MoveIt 2 and `ros2_control`.
-
-This moved the project closer to the workflow of a real industrial robot controller rather than a simple visualization demo.
+This was one of the most important software milestones between manual jogging and the later automatic jig-placement system.
 
 ---
 
-## Sequence Controller
+## Sequence entry point in the main robot GUI
 
-![Sequence programming GUI](../assets/screenshots/gui_sequence_programming.png)
+The main operator application provides jogging, gripper control, digital I/O, saved poses, sequence programming, and automatic jig placement from one interface.
 
-The GUI sequence window supports a row-based motion program. Each row can define a saved waypoint together with its motion and process behavior.
+![Main robot control GUI](../assets/screenshots/gui_manual_control.png)
 
-### Core controls
-
-- **ADD WAYPOINT** — append a saved pose to the program
-- **REMOVE SELECTED** — remove a row
-- **CLEAR ALL** — reset the sequence
-- **RUN SEQUENCE** — execute the programmed routine
-- **STOP** — interrupt execution
-- **RESUME** — continue after a pause where supported
-- **CLOSE SEQUENCE** — close the programming window
+From the **Saved Robot Poses** area, the operator can teach/store reusable poses and open the **SEQUENCE CONTROLLER** to build a program from them.
 
 ---
 
-## Waypoint programming
+## Sequence Controller running with the simulated robot
 
-Each sequence row can contain:
+The sequence window is a separate programming interface while Gazebo continues to show the robot and workcell.
 
-| Field | Purpose |
-|---|---|
-| **Waypoint** | Saved robot pose to execute |
-| **Behavior** | `STOP` or `CONTINUE` at the waypoint |
-| **Blend Radius** | Controls continuous transition through eligible poses |
-| **Motion** | `PTP` or `LIN` selection |
-| **Input Source** | Optional digital input condition |
-| **Input State** | Required `TRUE` / `FALSE` state |
-| **Input Timing** | Check input `BEFORE` or `AFTER` the waypoint |
-| **Output Action** | Digital output or gripper action |
-| **Output State** | Output state where applicable |
-| **Output Timing** | Execute output `BEFORE` or `AFTER` the waypoint |
+![Sequence Controller with Gazebo robot](../assets/screenshots/gui_sequence_programming.png)
 
-The final waypoint is forced to stop safely rather than blending through the end of a program.
+The example capture shows a four-step program — `pick`, `mid`, `place`, and `home` — with motion type, stop behavior, blend radius, input conditions, output/gripper actions, and timing all configured row by row.
+
+---
+
+## What can be programmed in each row
+
+| Sequence field | Available behavior | Purpose |
+|---|---|---|
+| **Waypoint** | Any saved robot pose | Defines the target pose for that program step |
+| **Behavior** | `STOP` / `CONTINUE` | Stop precisely at the waypoint or continue through an eligible blended transition |
+| **Blend Radius** | e.g. `0.001 m` | Controls the continuous transition around a waypoint when blending is allowed |
+| **Motion** | `PTP` / `LIN` | Selects point-to-point or linear Cartesian motion |
+| **Input Source** | `NONE`, `IN 1` … `IN 6` | Selects the digital input used as a process condition |
+| **Input State** | `TRUE` / `FALSE` | Defines the state that the selected input must satisfy |
+| **Input Timing** | `BEFORE` / `AFTER` | Checks the condition before or after the waypoint operation |
+| **Output Action** | `NONE`, `OUT 1` … `OUT 6`, `OPEN GRIPPER`, `CLOSE GRIPPER` | Commands a digital output or the gripper |
+| **Output State** | `TRUE` / `FALSE` | Defines the output state where applicable |
+| **Output Timing** | `BEFORE` / `AFTER` | Executes the output/gripper action before or after waypoint motion |
+
+The final waypoint is treated as a safe stopping point rather than being blended through the end of the program.
+
+---
+
+## Example process logic
+
+A sequence can express logic such as:
+
+```text
+1. PICK
+   IF IN 1 == TRUE BEFORE
+   move with LIN
+   CLOSE GRIPPER AFTER
+
+2. MID
+   IF IN 2 == FALSE BEFORE
+   move through the intermediate pose
+   set OUT 1 = TRUE BEFORE
+
+3. PLACE
+   IF IN 3 == TRUE AFTER
+   move to the placement pose
+   OPEN GRIPPER AFTER
+
+4. HOME
+   return to the home pose
+   stop safely at the final waypoint
+```
+
+This makes the table more than a pose list: it becomes a small industrial-style robot/process program.
 
 ---
 
 ## STOP vs CONTINUE
 
-Two waypoint behaviors were implemented:
-
 ### STOP
 
-The arm reaches the programmed pose and stops before the next operation.
+The robot reaches the programmed waypoint and stops before the next operation. This is useful for:
 
-This is useful for:
-
-- gripping,
-- releasing,
+- gripping and releasing,
 - process synchronization,
+- digital I/O changes,
 - inspection points,
-- I/O operations,
-- safety-critical transitions.
+- any step where the next action must wait for the current one to finish.
 
 ### CONTINUE
 
-The sequence can continue through the waypoint using the configured blend behavior, reducing unnecessary stop-start motion.
-
-This was inspired by the way industrial robot programs use approximation/blending to create smoother multi-point trajectories.
+The sequence can continue through an eligible waypoint using the configured blend radius. This reduces unnecessary stop-start motion and follows the same general programming idea used by industrial robot controllers for approximated/blended paths.
 
 ---
 
-## PTP and LIN motion types
-
-The sequence interface exposes two motion types:
+## PTP and LIN motion
 
 ### PTP — Point-to-Point
 
-The robot moves through joint space toward the target pose.
-
-PTP became the most reliable and heavily validated motion mode in the project and is intentionally used by the automatic jig-placement workflow.
+PTP plans a joint-space move toward the target pose. It became the most reliable and thoroughly validated sequence mode in this project and is intentionally used for the final automatic jig-placement workflow.
 
 ### LIN — Linear Cartesian motion
 
-LIN was added to support straight Cartesian tool motion between programmed points.
+LIN was implemented so the operator can request straight Cartesian tool motion between programmed points. It required substantially more debugging because Pilz planning, IK, acceleration limits, and the robot start state all affect whether a linear path can be accepted.
 
-This feature required considerably more debugging because Cartesian planning, IK, Pilz limits, start-state validation and sequence execution all interact. Several issues were found during development, including motion types being unintentionally overwritten by PTP and Pilz rejecting some trajectories because of acceleration/start-state constraints.
-
-The GUI retains LIN selection because it is part of the intended industrial-style programming model, while PTP is the more thoroughly validated mode in the final automatic workflow.
+An important bug found during development was that an older mixed-sequence path could overwrite the operator's selected motion types and force all rows to PTP. The execution logic was changed so the real per-row `PTP` / `LIN` selection is preserved.
 
 ---
 
-## Motion-type bug that had to be fixed
+## Digital inputs: BEFORE / AFTER + TRUE / FALSE
 
-An early version of the mixed-sequence code contained logic equivalent to:
+The sequence controller supports six logical digital inputs:
 
-```python
-working_motion_types = ["PTP"] * len(...)
+```text
+IN 1  IN 2  IN 3  IN 4  IN 5  IN 6
 ```
 
-That silently replaced the motion type selected by the operator, meaning a row shown as LIN could still execute through the PTP path.
+For each programmed input condition the operator selects:
 
-The sequence logic was changed to preserve the actual per-waypoint motion-type array instead of regenerating it as all-PTP.
+```text
+expected state: TRUE or FALSE
+check timing:   BEFORE or AFTER
+```
 
-An intermediate edit also introduced an undefined `segment_end` variable, which was corrected while restructuring the sequence segmentation logic.
+Examples:
 
-These bugs were important because a sequence controller has to execute **what the operator programmed**, not just what the GUI displays.
+```text
+IF IN 1 == TRUE BEFORE PICK
+IF IN 2 == FALSE BEFORE MID
+IF IN 3 == TRUE AFTER PLACE
+```
+
+This provides the basis for synchronizing the robot with sensors, fixtures, PLC-style process states, or other cell conditions.
 
 ---
 
-## Digital I/O integration
+## Digital outputs
 
-The sequence controller grew beyond motion waypoints and added process I/O.
-
-### Inputs
-
-Supported logical sources include:
+Six logical outputs are available:
 
 ```text
-NONE
-IN 1
-IN 2
-IN 3
-IN 4
-IN 5
-IN 6
+OUT 1  OUT 2  OUT 3  OUT 4  OUT 5  OUT 6
 ```
 
-Each input can specify:
+An output can be commanded `TRUE` or `FALSE`, and its action can occur `BEFORE` or `AFTER` the associated waypoint. That allows the robot program to coordinate motion with process equipment rather than treating motion and I/O as separate systems.
+
+---
+
+## Gripper actions inside a sequence
+
+The output-action field also supports:
 
 ```text
-required state: TRUE / FALSE
-timing: BEFORE / AFTER
-```
-
-This provides the basis for waiting on external process conditions before continuing a robot program.
-
-### Outputs
-
-Supported actions include:
-
-```text
-NONE
-OUT 1 ... OUT 6
 OPEN GRIPPER
 CLOSE GRIPPER
 ```
 
-Outputs can also be executed before or after the associated waypoint.
+These are not treated like ordinary fire-and-forget outputs. The arm and gripper must be synchronized so that the next arm move cannot begin while the gripper is still opening or closing.
 
-This turns the sequence table into a basic robot/process programming environment rather than just a list of poses.
-
----
-
-## Gripper synchronization — the barrier problem
-
-One of the harder sequence problems was making sure the arm did **not** continue to the next waypoint while the gripper was still moving.
-
-The final approach treats a gripper operation as an execution barrier:
+The final execution model uses a **gripper barrier**:
 
 ```text
-arm trajectory segment
-        ↓
+arm motion segment
+      ↓
 stop at gripper waypoint
-        ↓
+      ↓
 send gripper FollowJointTrajectory goal
-        ↓
-wait for the actual controller result
-        ↓
-continue with the next arm segment
+      ↓
+wait for the real controller result
+      ↓
+verify completion
+      ↓
+continue the next arm segment
 ```
 
-The sequence therefore forces the arm to stop before a gripper action, waits for the real gripper controller result, and only then resumes arm motion.
-
-The generic digital-output handler also avoids issuing duplicate OPEN/CLOSE commands when the dedicated gripper barrier is already handling them.
+The generic output handler also ignores gripper outputs when the dedicated gripper barrier is handling them, preventing duplicate open/close commands.
 
 ---
 
 ## Why cached gripper state was removed
 
-An earlier shortcut trusted a cached variable similar to:
+An older implementation used a cached GUI value similar to:
 
 ```python
 self.current_gripper_position
 ```
 
-Because GUI state can lag behind Gazebo/controller state, that caused false conditions such as "already open" or incorrect post-command validation.
+That state could lag behind the actual Gazebo/controller state. The more robust design waits for the real `FollowJointTrajectory` action result and trusts successful controller completion (`error_code == 0`) before continuing.
 
-The more reliable design is:
-
-```text
-send controller goal
-      ↓
-wait for acceptance
-      ↓
-wait for FollowJointTrajectory result
-      ↓
-check controller result code
-      ↓
-continue sequence
-```
-
-This was an important lesson in asynchronous robot-control software: **controller acknowledgement is more reliable than a stale UI cache**.
+This was an important ROS 2 control lesson: **goal acceptance is not the same as motion completion**.
 
 ---
 
-## Sequence execution architecture
+## RUN, STOP, and RESUME
 
-At a high level:
+The Sequence Controller provides:
+
+- **RUN SEQUENCE** — starts the programmed routine,
+- **STOP** — interrupts active execution,
+- **RESUME** — continues/retries the interrupted step from the robot's current state,
+- **REMOVE WAYPOINT** — removes an unwanted program row,
+- **CLEAR SEQUENCE** — resets the programmed sequence.
+
+The STOP path was developed beyond a simple GUI flag. It cancels the active MoveIt sequence goal and the active arm-controller `FollowJointTrajectory` goal so the simulated robot can actually stop during motion. RESUME then restarts the interrupted operation from the current state rather than assuming the previous trajectory completed.
+
+---
+
+## Execution architecture
 
 ```text
-Saved Poses
-    ↓
+Saved robot poses
+      ↓
 Sequence Controller GUI
-    ↓
-Waypoint + behavior + blend + motion + I/O
-    ↓
-Segment sequence around STOP / I/O / gripper barriers
-    ↓
-MoveIt 2 planning / sequence action
-    ↓
-arm_controller FollowJointTrajectory
-    ↓
-ros2_control
-    ↓
-Gazebo simulated robot
-```
-
-The project uses the MoveIt sequence action:
-
-```text
+      ↓
+Waypoint + behavior + blend + motion
+      ↓
+Input conditions + output/gripper actions
+      ↓
+Segment around STOP / I/O / gripper barriers
+      ↓
+MoveIt 2 / Pilz planning
+      ↓
 /sequence_move_group
+      ↓
+/arm_controller/follow_joint_trajectory
+      ↓
+ros2_control
+      ↓
+Gazebo robot
 ```
 
-and the arm controller action:
+The gripper uses its own trajectory controller:
 
 ```text
-/arm_controller/follow_joint_trajectory
+/gripper_controller/follow_joint_trajectory
 ```
-
-with the gripper using its own FollowJointTrajectory controller.
 
 ---
 
-## Problems encountered during development
+## Important sequence bugs and engineering lessons
 
-The sequence system took substantial iteration because the failure could occur at several different layers.
+The system required substantial iteration because failures could occur at the GUI, planner, action, controller, or simulator layer. Key issues solved during development included:
 
-### 1. Large plans failed while small moves worked
-
-Small Cartesian/joint increments could succeed while larger sequence plans failed. This required separating planning problems from controller/execution problems instead of assuming every failure had the same cause.
-
-### 2. Duplicate MoveIt instances
-
-At one point duplicate `move_group` processes produced confusing sequence-action behavior and apparent failures even when the robot moved.
-
-The startup workflow was cleaned so only one intended planning stack runs.
-
-### 3. Motion type was being overwritten
-
-As described above, parts of the code unintentionally forced PTP. The mixed-sequence path had to preserve each row's actual motion type.
-
-### 4. LIN / Pilz constraints
-
-Linear motion exposed acceleration-limit, IK and start-state issues that did not appear in the same way during PTP execution.
-
-### 5. Gripper timing
-
-The arm initially could continue before the gripper had actually completed. The explicit gripper barrier fixed this.
-
-### 6. Action result handling
-
-The system had to distinguish between:
-
-- goal accepted,
-- motion actually executed,
-- action result returned,
-- cancellation,
-- apparent sequence failure caused by duplicate servers.
-
-This debugging work significantly improved the project's ROS 2 action-handling architecture.
+- mixed-sequence logic unintentionally forcing rows to PTP,
+- an intermediate `segment_end` segmentation bug,
+- duplicate `move_group` processes causing confusing action behavior,
+- LIN/Pilz acceleration and start-state constraints,
+- IK/start-state failures that appeared only on some linear moves,
+- stale cached gripper state,
+- distinguishing goal acceptance from actual execution completion,
+- preventing duplicate gripper commands,
+- forcing synchronization barriers around open/close actions,
+- implementing actual mid-motion STOP and useful RESUME behavior.
 
 ---
 
 ## Relationship to automatic jig placement
 
-The sequence controller and the automatic jig-placement subsystem are different layers, but the sequence work was foundational.
-
-The project evolved approximately as:
+The sequence controller and automatic jig placement are separate application layers, but the sequence work laid much of the control foundation:
 
 ```text
-manual joint/cartesian control
-          ↓
+manual jogging
+      ↓
 saved poses
-          ↓
+      ↓
 sequence programming
-          ↓
-motion + I/O + gripper synchronization
-          ↓
-reliable controller/action handling
-          ↓
+      ↓
+PTP/LIN + blending
+      ↓
+I/O + gripper synchronization
+      ↓
+robust action handling and cancellation
+      ↓
 automatic jig-placement state machine
 ```
 
-The later automatic system uses more specialized runtime logic, but many of the hard lessons about planning, execution, cancellation, gripper synchronization and controller state came from building the sequence feature first.
+The automatic placement workflow later added runtime IK, dynamic TF target discovery, jig inventory, attach/detach logic, occupied-target tracking, validation, and full-table execution.
 
 ---
 
 ## Why this feature matters
 
-The Sequence Controller demonstrates more than GUI development. It combines:
+The Sequence Controller demonstrates the integration of:
 
-- robot programming concepts,
-- reusable taught poses,
-- motion planning,
-- industrial-style PTP/LIN selection,
-- blending,
-- digital I/O,
-- gripper synchronization,
-- asynchronous ROS 2 action handling,
-- STOP/RESUME concepts,
-- error handling across MoveIt and ros2_control.
+- reusable taught robot poses,
+- industrial-style waypoint programming,
+- PTP and LIN motion selection,
+- STOP/CONTINUE behavior,
+- path blending,
+- digital input conditions,
+- TRUE/FALSE process logic,
+- BEFORE/AFTER event timing,
+- digital outputs,
+- synchronized gripper operations,
+- MoveIt 2 sequence execution,
+- ros2_control trajectory actions,
+- cancellation and STOP/RESUME behavior,
+- debugging across asynchronous ROS 2 components.
 
-For this project, sequence programming was the point where the robot stopped being just a model that could move and started becoming a **programmable robotic system**.
+For this project, sequence programming is the point where the robot moved from **"a simulated arm that can be jogged"** to **"a programmable robotic system that can execute an ordered process."**
 
 ---
 
