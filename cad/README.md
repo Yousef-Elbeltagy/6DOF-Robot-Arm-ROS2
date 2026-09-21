@@ -1,6 +1,6 @@
-# SolidWorks CAD Models
+# CAD Models
 
-This directory contains the native mechanical CAD packages used for the 6-DOF robot-arm project.
+This directory contains the mechanical CAD packages used for the 6-DOF robot-arm project, including both the original SolidWorks files and neutral STEP exports for interoperability.
 
 ## Available CAD archives
 
@@ -9,6 +9,21 @@ This directory contains the native mechanical CAD packages used for the 6-DOF ro
 | `Solidworks_Cad_models/full_Cobot_Solidworks_Cad.zip` | Full 6-DOF robot arm and gripper SolidWorks CAD package | 32.7 MB |
 | `Solidworks_Cad_models/Cobot_Jigs_Solidworks_Cad.zip` | Jig CAD models used by the automatic placement workcell | 0.9 MB |
 | `Solidworks_Cad_models/Pick_Table_Solidworks_Cad.zip` | Pick/placement table and target-related SolidWorks CAD package | 1.2 MB |
+| `STEP_Exports/Complete_Robot_Workcell_STEP_Components.zip` | Neutral STEP export package containing the complete robot workcell assembly together with separate STEP component files | 22.0 MB |
+
+## Which format should I use?
+
+Use the **SolidWorks archives** when you want the original editable design files and native assembly relationships.
+
+Use the **STEP export archive** when you want to inspect, measure, reuse, or import the geometry in another CAD package without requiring SolidWorks.
+
+The STEP archive contains:
+
+- the complete robot/workcell STEP assembly,
+- the 6-DOF robot and gripper geometry,
+- workcell table geometry,
+- target and jig geometry,
+- separate STEP files for the exported assembly components.
 
 ## Relationship to the ROS 2 model
 
@@ -41,13 +56,13 @@ Important mechanical design notes:
 
 ## Opening the files
 
-The archives contain SolidWorks CAD data. Extract each ZIP archive before opening the assemblies or parts.
+### SolidWorks
 
-For best results, keep all referenced files from an archive together after extraction so that SolidWorks can resolve assembly references correctly.
+Extract the relevant ZIP archive before opening its assemblies or parts. Keep all referenced files from an archive together after extraction so SolidWorks can resolve assembly references correctly.
 
-## Interoperability
+### STEP
 
-Native SolidWorks files are included here because they preserve the original design intent and assembly relationships. Neutral CAD exports such as STEP can be added later if required for users who do not have SolidWorks.
+Extract `STEP_Exports/Complete_Robot_Workcell_STEP_Components.zip`, then open either the complete workcell STEP assembly or the individual component STEP files in any CAD package with STEP support.
 
 ## Notes for contributors
 
