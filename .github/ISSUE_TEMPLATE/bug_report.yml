@@ -1,0 +1,75 @@
+name: Bug report
+description: Report a reproducible problem in the public ROS 2 simulation/control project
+title: "[Bug]: "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Please reproduce it on the documented Ubuntu 22.04 / ROS 2 Humble baseline when possible.
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, ROS 2 distribution, Gazebo version, and relevant hardware/VM details.
+      placeholder: Ubuntu 22.04, ROS 2 Humble, Gazebo Classic 11
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem description
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest reliable sequence of commands/actions that reproduces the issue.
+      placeholder: |
+        1. Clone/build...
+        2. Run...
+        3. Open...
+        4. Observe...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant terminal output or logs
+      description: Paste only the relevant error/output. Remove private paths, credentials, or company-confidential information.
+      render: shell
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Build / dependencies
+        - Gazebo simulation
+        - MoveIt / planning
+        - ros2_control / controllers
+        - GUI / manual control
+        - Sequence Controller
+        - Automatic jig placement
+        - URDF / TF / meshes
+        - CAD / mechanical files
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-submission checks
+      options:
+        - label: I checked QUICKSTART.md and docs/TROUBLESHOOTING.md.
+          required: true
+        - label: I am not reporting a claim that the repository is a commissioned/certified physical robot system.
+          required: true
