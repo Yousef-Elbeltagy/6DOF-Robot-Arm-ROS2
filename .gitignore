@@ -1,0 +1,55 @@
+# ROS 2 / colcon
+build/
+install/
+log/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.venv/
+venv/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Runtime logs
+*.log
+
+# Large archives / handover packages
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# Local runtime/config snapshots
+robot_gui_runtime.log
+gazebo_crash_capture.log
+
+# Backups/checkpoints
+*BACKUP*
+*backup*
+*checkpoint*
+*CHECKPOINT*
+
+# SolidWorks temporary/lock files
+~$*
+*.sldasm~
+*.sldprt~
+
+# Generated Gazebo / ROS cache
+.gazebo/
+.ros/
+
+# Optional local environment manifests
+ENVIRONMENT_MANIFESTS/
