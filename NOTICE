@@ -1,0 +1,13 @@
+6DOF Robot Arm — ROS 2
+Copyright 2026 Yousef El-Beltagy
+
+This repository is distributed under the Apache License 2.0 for project-authored files unless a file or subtree states otherwise.
+
+Third-party components retain their original licenses and attribution notices.
+
+Notably:
+
+- `src/IFRA_LinkAttacher/` contains software originating from IFRA-Group, Cranfield University and includes its own Apache-2.0 license and copyright notice.
+- Other vendored or adapted dependencies should be redistributed with their original license files intact.
+
+This project is a simulation-validated engineering prototype and is not a certified industrial or collaborative-robot safety system.
