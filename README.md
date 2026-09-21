@@ -148,15 +148,19 @@ physics/workcell      IK/planning
 
 The **Sequence Controller** is a dedicated robot-programming layer and one of the most important software features in this project. It is where the system moved from manual jogging and saved poses to an **ordered, programmable robotic process**.
 
-### Main operator GUI — teach, save and launch sequences
+### Main Operator Interface
 
-![Main Robot Control GUI](assets/screenshots/gui_manual_control.png)
+<p align="center">
+  <img src="assets/screenshots/gui_manual_control.png" alt="Main Robot Control GUI" width="38%">
+</p>
 
 The main interface provides Cartesian/joint control, gripper commands, six digital inputs, six digital outputs, saved poses, the Sequence Controller, Automatic Jig Placement, and live application status.
 
-### Sequence Controller + Gazebo robot
+### Sequence Controller
 
-![Sequence Controller with Gazebo Robot](assets/screenshots/gui_sequence_programming.png)
+<p align="center">
+  <img src="assets/screenshots/gui_sequence_programming.png" alt="Sequence Controller" width="72%">
+</p>
 
 The sequence table can program motion and process logic **row by row**:
 
