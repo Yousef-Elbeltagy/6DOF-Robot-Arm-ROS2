@@ -58,11 +58,27 @@ The Python/Tkinter interface grew into a complete operator application with Cart
 
 ---
 
-## 7. Sequence programming
+## 7. Sequence programming — a major project milestone
 
 ![Sequence programming GUI](../assets/screenshots/gui_sequence_programming.png)
 
-The sequence controller supports saved waypoints, STOP/CONTINUE behavior, blend radius, PTP/LIN selection, digital I/O conditions and gripper actions.
+The **Sequence Controller** was one of the most time-intensive software features in the project. It transformed saved robot poses into a programmable motion routine and added industrial-style execution features including:
+
+- ordered saved waypoints,
+- `STOP` / `CONTINUE` behavior,
+- blend radius,
+- `PTP` / `LIN` motion selection,
+- digital input conditions,
+- digital output actions,
+- `BEFORE` / `AFTER` I/O timing,
+- synchronized gripper actions,
+- sequence STOP / RESUME controls.
+
+A key implementation detail was the **gripper execution barrier**: the arm stops, sends the gripper trajectory, waits for the real controller result, and only then continues with the next arm segment. This prevented asynchronous arm/gripper overlap and made programmed sequences much more reliable.
+
+The sequence work also uncovered and fixed several important ROS 2 / MoveIt issues, including duplicate `move_group` instances, motion types being unintentionally forced to PTP, LIN/Pilz planning constraints, stale gripper-state feedback and action-result synchronization.
+
+➡️ **[Read the full Sequence Programming & Execution documentation](SEQUENCE_PROGRAMMING.md)**
 
 ---
 
@@ -89,7 +105,9 @@ MoveIt 2 + RViz
     ↓
 Custom GUI
     ↓
-Sequence controller
+Saved poses
+    ↓
+Sequence programming + I/O + gripper synchronization
     ↓
 Automatic jig placement
     ↓
