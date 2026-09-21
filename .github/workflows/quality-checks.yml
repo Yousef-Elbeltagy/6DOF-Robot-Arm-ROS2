@@ -1,0 +1,52 @@
+name: Repository quality checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python syntax check
+        run: |
+          python3 -m compileall -q src/robot_arm_python/robot_arm_python
+
+      - name: Shell syntax check
+        run: |
+          find scripts -maxdepth 1 -type f -name '*.sh' -print0 | xargs -0 -r -n1 bash -n
+
+      - name: Validate package.xml files
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          files = sorted(Path('src').rglob('package.xml'))
+          if not files:
+              raise SystemExit('No package.xml files found')
+          for path in files:
+              ET.parse(path)
+              print(f'OK: {path}')
+          PY
+
+      - name: Check required project files
+        run: |
+          test -f README.md
+          test -f QUICKSTART.md
+          test -f LICENSE
+          test -f NOTICE
+          test -f CONTRIBUTING.md
+          test -f docs/REPRODUCE_PROJECT.md
+          test -f docs/CONTINUE_DEVELOPMENT.md
+          test -f docs/TROUBLESHOOTING.md
+          test -f docs/BOM.md
+          test -f scripts/check_system.sh
+          test -f scripts/start_robot.sh
+
+      - name: Check for common generated artifacts
+        run: |
+          ! find . -path './.git' -prune -o \( -name '__pycache__' -o -name '*.pyc' -o -name 'build' -o -name 'install' -o -name 'log' \) -print | grep -q .
