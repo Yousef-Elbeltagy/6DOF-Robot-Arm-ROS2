@@ -1,0 +1,57 @@
+name: Feature request
+description: Propose a focused improvement to the robot, simulation, controls, CAD, or documentation
+title: "[Feature]: "
+labels: []
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Engineering goal
+      description: What capability or problem should this change address?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Mechanical / CAD
+        - Hardware integration
+        - EtherCAT / CAN
+        - Gazebo simulation
+        - MoveIt / motion planning
+        - ros2_control
+        - GUI / operator interface
+        - Sequence Controller
+        - Automatic jig placement
+        - Vision / calibration
+        - Safety / commissioning
+        - Documentation / reproducibility
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Describe the intended change and how it fits the existing architecture.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Suggested acceptance criteria
+      description: What observable result would show that the feature is complete?
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Project constraints acknowledged
+      options:
+        - label: I understand that the current public project is simulation-validated and not a commissioned/certified physical robot.
+          required: true
+        - label: I will avoid committing private handover material, supplier-confidential documents, or unnecessary backup archives.
+          required: true
