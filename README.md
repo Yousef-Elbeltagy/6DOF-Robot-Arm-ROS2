@@ -276,17 +276,36 @@ The repository gallery uses **real project CAD, simulation and GUI screenshots**
 ### Custom operator interface
 
 <table>
-<tr>
-<td width="50%"><img src="assets/screenshots/gui_manual_control.png" alt="Robot controller GUI"></td>
-<td width="50%"><img src="assets/screenshots/gui_sequence_programming.png" alt="Sequence programming GUI"></td>
-</tr>
-<tr>
-<td align="center"><b>Manual robot control</b></td>
-<td align="center"><b>Sequence programming</b></td>
-</tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/gui_manual_control.png" alt="Main Operator Interface" width="430"><br>
+      <b>Main Operator Interface</b>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/gui_sequence_programming.png" alt="Sequence Controller" width="430"><br>
+      <b>Sequence Controller</b>
+    </td>
+  </tr>
 </table>
 
-### Automatic jig-placement workflow
+The main interface provides Cartesian/joint control, TCP display and target entry, gripper commands, six digital inputs, six digital outputs, saved poses, access to the Sequence Controller, Automatic Jig Placement, and live application status.
+
+### Sequence Controller
+
+The Sequence Controller allows the operator to build motion logic row by row. Each row can define:
+
+- **Waypoint** — any saved robot pose  
+- **Behavior** — stop at a waypoint or continue through it  
+- **Blend radius** — smoothing for continuous motion  
+- **Motion type** — linear motion (LIN)  
+- **Conditional logic** — `IF IN x = TRUE/FALSE`  
+- **Condition timing** — evaluate conditions **BEFORE** or **AFTER** a waypoint  
+- **Output actions** — activate or deactivate digital outputs  
+- **Gripper actions** — open or close the gripper  
+- **Execution flow** — run, stop, resume, clear, or remove waypoints  
+
+
+## Automatic jig-placement workflow
 
 ![Automatic jig placement GUI](assets/screenshots/automatic_jig_placement_gui.png)
 
