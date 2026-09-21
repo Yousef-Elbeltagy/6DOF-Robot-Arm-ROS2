@@ -1,263 +1,535 @@
+<div align="center">
+
 # 6DOF Robot Arm — ROS 2
 
-A custom **6-DOF robotic arm** designed in SolidWorks and developed as a robotics/mechatronics internship project, with a complete simulation and control stack built around **ROS 2 Humble**, **Gazebo Classic 11**, **MoveIt 2**, **RViz 2**, and a custom **Python/Tkinter GUI**.
+### Mechanical design → digital twin → motion planning → custom control → autonomous jig placement
 
-The project focuses on flexible robotic manipulation for a **wire-harness jig-placement application**, combining mechanical design, robot modeling, motion planning, runtime inverse kinematics, gripper control, sequence execution, and automatic pick-and-place behavior.
+[![ROS 2](https://img.shields.io/badge/ROS%202-Humble-22314E?logo=ros)](https://docs.ros.org/en/humble/)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-E95420?logo=ubuntu&logoColor=white)](https://ubuntu.com/)
+[![Gazebo](https://img.shields.io/badge/Gazebo-Classic%2011-F58113)](https://classic.gazebosim.org/)
+[![MoveIt](https://img.shields.io/badge/MoveIt-2-2D9CDB)](https://moveit.picknik.ai/)
+[![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+![Status](https://img.shields.io/badge/Status-Simulation--Validated-success)
 
-## Highlights
+**A 6-axis robot arm developed from SolidWorks CAD into a complete ROS 2 simulation and control system for automated wire-harness jig placement.**
 
-- 6-DOF articulated robot arm
-- SolidWorks mechanical design and CAD-to-URDF workflow
-- ROS 2 Humble integration
-- Gazebo Classic 11 simulation
-- MoveIt 2 motion planning and inverse kinematics
-- RViz 2 visualization
-- ros2_control trajectory execution
-- Custom Python/Tkinter operator GUI
-- Joint and Cartesian jogging
-- WORLD / FLANGE / TOOL jogging frames
-- Configurable TCP
-- Saved robot poses
-- PTP / LIN sequence programming
-- Digital I/O logic
-- Gripper trajectory control
-- Automatic jig detection and placement
-- Runtime IK with closest-solution selection
-- Dynamic target discovery from TF
-- Automatic full-table execution
-- Immediate STOP / RESUME behavior
-- Gazebo link attachment/detachment for simulated grasping
+</div>
 
-## Project Motivation
+---
 
-Traditional wire-harness assembly boards are often product-specific, which makes changeovers expensive, space-intensive, and inflexible.
+## Project at a glance
 
-This project explores a reusable workboard concept in which a robot automatically places modular jigs at required locations. The long-term idea is to combine the robot with machine vision so that new harness layouts can be configured with far less manual rework.
-
-## System Architecture
-
-```text
-SolidWorks CAD
-      |
-      v
-URDF + STL meshes
-      |
-      +---------------------------+
-      |                           |
-      v                           v
-Gazebo Classic               MoveIt 2
-Physics / workcell            Planning / IK
-      |                           |
-      +-------------+-------------+
-                    |
-                    v
-                ROS 2 Humble
-                    |
-             ros2_control
-                    |
-                    v
-         Python / Tkinter GUI
-                    |
-        +-----------+-----------+
-        |           |           |
-        v           v           v
-     Jogging     Sequences   Automatic Jig
-                              Placement
-```
-
-## Software Stack
-
-| Component | Version / Tool |
+| | |
 |---|---|
-| OS | Ubuntu 22.04 LTS |
-| ROS | ROS 2 Humble |
-| Simulator | Gazebo Classic 11 |
-| Motion Planning | MoveIt 2 |
-| Visualization | RViz 2 |
-| Control | ros2_control / ros2_controllers |
-| Planning | OMPL + Pilz Industrial Motion Planner |
-| GUI | Python 3 + Tkinter |
-| CAD | SolidWorks |
-| Build System | colcon / ament |
+| **Robot** | 6-DOF articulated arm + custom gripper |
+| **Design target** | ~1.5 m reach, ~10 kg payload |
+| **Mechanical CAD** | SolidWorks |
+| **Robot model** | URDF + STL meshes |
+| **Robotics stack** | ROS 2 Humble, MoveIt 2, RViz 2, ros2_control |
+| **Simulation** | Gazebo Classic 11 |
+| **Control application** | Custom Python/Tkinter GUI |
+| **Autonomy** | Runtime IK, dynamic TF targets, full-table jig placement |
+| **Development context** | Robotics / Mechatronics internship project |
 
-## Robot Design
+> The final system is a **simulation-validated engineering prototype**. The physical six-axis arm was not fully commissioned during the project period because the selected integrated joint modules had a long procurement lead time.
 
-The robot was designed as a 6-axis articulated arm with an intended reach of approximately **1.5 m** and a target payload of approximately **10 kg**.
+---
 
-The mechanical design went through several iterations involving:
+## Why this project exists
 
-- hollow aluminum links
-- structural FEA
-- stiffness and stress studies
-- custom cycloidal reducer research
-- planetary/belt reduction concepts
-- final selection of integrated robotic joint modules
+Wire-harness assembly can depend on dedicated boards and fixed jig layouts for each product or variant. That creates three practical problems:
 
-The final mechanical direction uses **6061-T6 aluminum** for the main lightweight structure and integrated servo-reducer joint modules for the six robot axes.
+- **slow changeovers** when the product changes,
+- **storage overhead** from dedicated boards,
+- **limited flexibility** when new layouts are introduced.
 
-## Final Actuator Concept
+The concept explored here is a reusable workboard with modular jigs. Instead of rebuilding the board, a robot selects the required jig from a source table and places it at the correct target location automatically.
 
-| Joint | Module | Rated Torque | Peak Torque |
-|---|---|---:|---:|
-| J1–J2 | TD-110-170 | 328 N·m | 702 N·m |
-| J3 | TD-100-142 | 169 N·m | 411 N·m |
-| J4–J6 | TD-70-90 | 50 N·m | 102 N·m |
+The long-term vision is a flexible cell where a camera reads a harness layout, identifies target positions, and the robot configures the board automatically.
 
-The calculated dynamic peak torque at J2 was approximately **411.9 N·m**, making it the governing joint for actuator sizing.
+---
 
-## ROS 2 Workspace
-
-The project workspace contains packages for:
+## From CAD to autonomous robot
 
 ```text
-robot_arm_with_gripper_urdf
-robot_arm_moveit_config
-robot_arm_python
-pymoveit2
-table_harness_urdf_v3
-pick_table_urdf
-large_jig_urdf
-medium_jig_urdf
-small_jig_urdf
-IFRA_LinkAttacher
+Mechanical design in SolidWorks
+              ↓
+     Mass / inertia / joint axes
+              ↓
+        URDF + STL meshes
+              ↓
+     ROS 2 Humble robot model
+              ↓
+   ┌──────────┴──────────┐
+   ↓                     ↓
+Gazebo Classic        MoveIt 2
+physics / workcell    IK / planning
+   └──────────┬──────────┘
+              ↓
+         ros2_control
+              ↓
+      Python/Tkinter GUI
+              ↓
+  manual control + sequences
+              ↓
+   automatic jig placement
 ```
 
-## Custom GUI
+---
 
-The custom operator interface includes:
+## What I built
 
-- X / Y / Z Cartesian jog
-- Roll / Pitch / Yaw jog
-- J1–J6 joint jog
-- speed override
-- WORLD / FLANGE / TOOL frames
-- TCP configuration
-- saved poses
-- sequence controller
-- PTP / LIN motion selection
+### Mechanical engineering
+
+- 6-axis articulated robot architecture
+- hollow aluminum link design
+- actuator packaging and joint housings
+- structural FEA and stiffness studies
+- torque model for all six axes
+- custom cycloidal reducer research
+- planetary/belt reduction studies
+- final integrated actuator selection
+- complete gripper integration
+
+### Robot modeling & simulation
+
+- SolidWorks-to-URDF workflow
+- joint axes and coordinate-system definition
+- mass, inertia, visual and collision properties
+- Gazebo robot + workcell simulation
+- MoveIt planning configuration
+- RViz planning-scene validation
+- ros2_control trajectory execution
+
+### Custom robot controller
+
+- Cartesian X/Y/Z jogging
+- Roll/Pitch/Yaw jogging
+- J1-J6 joint jogging
+- 10/25/50/75/100% speed override
+- WORLD / FLANGE / TOOL jog frames
+- configurable Tool Center Point
+- saved robot poses
+- gripper open/close control
+- sequence programming
 - STOP / CONTINUE waypoint behavior
 - blend radius
-- digital I/O
-- gripper actions
-- automatic jig placement
-- full-table automatic execution
+- PTP / LIN motion selection
+- digital input/output logic
+
+### Autonomous workcell
+
+- dynamic target discovery from TF
+- automatic jig-type inference
+- matching-jig scan
+- runtime inverse kinematics
+- multi-seed IK branch selection
+- simulated attach/detach
+- used-jig inventory tracking
+- occupied-target tracking
+- placement validation
+- full-table automatic run
 - immediate STOP / RESUME
 
-## Automatic Jig Placement
+---
 
-The automatic placement workflow is approximately:
+## Real project gallery
+
+The repository gallery uses **real project CAD, simulation and GUI screenshots**. AI-generated robot artwork is intentionally excluded.
+
+### SolidWorks robot model
+
+![SolidWorks robot CAD](assets/screenshots/cad_robot_overview.png)
+
+### Gazebo simulation and MoveIt/RViz validation
+
+<table>
+<tr>
+<td width="50%"><img src="assets/screenshots/gazebo_robot_simulation.png" alt="Gazebo simulation"></td>
+<td width="50%"><img src="assets/screenshots/moveit_rviz_validation.png" alt="MoveIt RViz"></td>
+</tr>
+<tr>
+<td align="center"><b>Gazebo Classic 11</b></td>
+<td align="center"><b>MoveIt 2 + RViz 2</b></td>
+</tr>
+</table>
+
+### Custom operator interface
+
+<table>
+<tr>
+<td width="50%"><img src="assets/screenshots/gui_manual_control.png" alt="Robot controller GUI"></td>
+<td width="50%"><img src="assets/screenshots/gui_sequence_programming.png" alt="Sequence programming GUI"></td>
+</tr>
+<tr>
+<td align="center"><b>Manual robot control</b></td>
+<td align="center"><b>Sequence programming</b></td>
+</tr>
+</table>
+
+### Automatic jig-placement workflow
+
+![Automatic jig placement GUI](assets/screenshots/automatic_jig_placement_gui.png)
+
+➡️ **[Open the full project gallery](docs/GALLERY.md)**
+
+---
+
+## Mechanical design
+
+The robot was designed around a target reach of approximately **1.5 m** and a target payload of approximately **10 kg**.
+
+The main moving structure uses **6061-T6 aluminum** to keep link mass low while retaining practical machinability and strength.
+
+The mechanical design evolved through several iterations:
+
+1. cylindrical/tapered hollow links,
+2. internal-rib concepts,
+3. manufacturability review,
+4. unribbed shell design with local reinforcement,
+5. custom gearbox studies,
+6. integrated robot-joint modules.
+
+### Dynamic joint torque results
+
+| Joint | Peak torque |
+|---|---:|
+| J1 | 115.58 N·m |
+| **J2** | **411.90 N·m** |
+| J3 | 182.49 N·m |
+| J4 | 35.64 N·m |
+| J5 | 15.50 N·m |
+| J6 | 5.10 N·m |
+
+J2 became the governing axis because it carries the downstream links, wrist, gripper and payload.
+
+### Final actuator concept
+
+| Joint(s) | Module | Rated torque | Peak/start-stop torque |
+|---|---|---:|---:|
+| J1-J2 | TD-110-170 | 328 N·m | 702 N·m |
+| J3 | TD-100-142 | 169 N·m | 411 N·m |
+| J4-J6 | TD-70-90 | 50 N·m | 102 N·m |
+
+The integrated modules combine the motor, encoder, brake and precision reducer, avoiding the schedule and manufacturing risk of six custom gearboxes.
+
+➡️ **[Mechanical design details](docs/MECHANICAL_DESIGN.md)**
+
+---
+
+## CAD → URDF → ROS 2
+
+The SolidWorks assembly was prepared with explicit reference coordinate systems and revolute-joint axes before export.
+
+The digital model carries:
+
+- parent/child link hierarchy,
+- joint origins and axes,
+- motion limits,
+- link mass and center of mass,
+- inertia tensors,
+- visual meshes,
+- collision meshes,
+- gripper mimic relationships.
+
+![CAD to URDF exporter](assets/screenshots/cad_to_urdf_exporter.png)
+
+---
+
+## Software stack
+
+| Layer | Technology |
+|---|---|
+| Operating system | Ubuntu 22.04 LTS |
+| Middleware | ROS 2 Humble |
+| Physics simulation | Gazebo Classic 11 |
+| Motion planning | MoveIt 2 |
+| Planning pipelines | OMPL + Pilz |
+| Visualization | RViz 2 |
+| Control | ros2_control + ros2_controllers |
+| GUI | Python 3 + Tkinter |
+| Build | colcon / ament |
+
+➡️ **[Software architecture](docs/SOFTWARE_ARCHITECTURE.md)**
+
+---
+
+## Custom Python robot controller
+
+The GUI became a full operator interface rather than a simple test panel.
+
+It supports both manual and programmed robot operation:
 
 ```text
-Discover free target frames
+Manual control
+├── Cartesian jog: X / Y / Z
+├── Orientation jog: Roll / Pitch / Yaw
+├── Joint jog: J1 ... J6
+├── Speed override
+├── WORLD / FLANGE / TOOL frames
+├── TCP configuration
+└── Gripper control
+
+Programming
+├── Saved poses
+├── Waypoint sequences
+├── STOP / CONTINUE behavior
+├── Blend radius
+├── PTP / LIN selection
+├── Digital inputs
+├── Digital outputs
+└── Gripper actions
+```
+
+The working TCP used by the controller is approximately:
+
+```text
+[0, 0, 0.4193463143, 0, 0, 0]
+```
+
+---
+
+## Automatic jig placement
+
+This is the most advanced application layer in the project.
+
+```text
+Search free target TFs
         ↓
 Infer required jig size
         ↓
-Scan for a matching unused jig
+Find unused matching jig
         ↓
 Compute runtime IK
         ↓
-Move above pickup
+Choose best IK branch
         ↓
-Descend and close gripper
+Move to pickup
         ↓
-Attach jig in Gazebo
+Grip + attach
         ↓
-Lift and move to target
+Lift and transfer
         ↓
-Descend and release
+Place + detach
         ↓
-Detach jig
+Validate
         ↓
-Validate placement
+Mark jig used + target occupied
         ↓
-Mark jig and target as used
-        ↓
-Continue to next target
+Continue automatically
 ```
 
-Placement targets are discovered dynamically from TF frames ending in:
+Example targets:
 
 ```text
-_target_link
+L1 -> LARGE jig
+M1 -> MEDIUM jig
+M2 -> MEDIUM jig
+S1 -> SMALL jig
 ```
 
-Current example target IDs include:
+Targets are discovered dynamically from TF frame names ending in `_target_link`, rather than relying only on a hard-coded coordinate list.
+
+➡️ **[Automatic jig-placement architecture](docs/AUTOMATIC_JIG_PLACEMENT.md)**
+
+---
+
+## Runtime inverse kinematics
+
+The autonomous system uses MoveIt's IK service at runtime.
+
+A single target can have several valid joint solutions, and the first mathematical solution is not necessarily a good robot motion. During development, some valid solutions produced large wrist flips.
+
+The controller therefore:
+
+1. tries multiple generic IK seeds,
+2. collects valid candidates,
+3. computes wrapped joint deltas from the current state,
+4. weights wrist motion more strongly,
+5. selects the lowest-motion candidate.
+
+This solved the wrist-branch problem generically instead of adding target-specific joint hacks.
+
+---
+
+## Full-table autonomy & STOP / RESUME
+
+The full-run mode can process the available target set without manual reselection.
+
+Two explicit state trackers make this possible:
+
+```python
+placed_jig_models
+filled_placement_targets
+```
+
+They prevent:
+
+- reusing a jig that has already been placed,
+- sending another jig to an already occupied target.
+
+The STOP button was also upgraded from a simple software flag into an immediate motion interruption. It cancels both the active MoveIt goal and the arm-controller trajectory. RESUME retries the interrupted automatic step from the robot's current state.
+
+---
+
+## A debugging problem worth highlighting: Gazebo detach crash
+
+One of the most difficult failures was a native `gzserver` crash during jig release.
+
+The issue was traced to physics/joint manipulation occurring from a ROS service callback thread. The LinkAttacher implementation was changed so that:
 
 ```text
-L1
-M1
-M2
-S1
+ROS service callback
+       ↓
+queue detach request
+       ↓
+Gazebo OnUpdate()
+       ↓
+Joint::Detach()
 ```
 
-where the prefix indicates the required jig size.
+Executing the actual detach operation on Gazebo's update thread significantly improved repeated pick-and-place stability.
 
-## Runtime Inverse Kinematics
+This is a good example of why robotics debugging often spans application logic, middleware, controller timing and simulator internals at the same time.
 
-The automatic placement system uses MoveIt's IK service and evaluates multiple seed configurations. When several valid IK solutions exist, the system selects a solution that minimizes wrapped joint motion, with additional weighting on wrist joints to reduce unnecessary wrist flips.
+---
 
-This approach was used to eliminate large, visually undesirable wrist rotations while keeping the implementation generic rather than hard-coding target-specific joint solutions.
+## FEA and stiffness
 
-## Gripper
+Structural analysis produced two important lessons:
 
-The gripper is integrated into the robot URDF and controlled through a ROS 2 `FollowJointTrajectory` controller.
+- local joint transitions can create stress concentrations even when the rest of the tube is lightly stressed,
+- a robot can be strong enough not to yield while still being too flexible for accurate positioning.
 
-The main gripper joint is:
+![FEA stress result](assets/screenshots/fea_stress_result.png)
+
+The design therefore considered both von Mises stress **and** end-effector displacement, rather than treating factor of safety as the only metric.
+
+---
+
+## Repository structure
 
 ```text
-left_gear_joint
+6DOF-Robot-Arm-ROS2/
+├── README.md
+├── src/                         # ROS 2 source packages
+├── scripts/                     # startup scripts
+├── config/                      # TCP and saved-pose configuration
+├── assets/
+│   └── screenshots/             # real project screenshots
+└── docs/
+    ├── SETUP.md
+    ├── PROJECT_STORY.md
+    ├── MECHANICAL_DESIGN.md
+    ├── SOFTWARE_ARCHITECTURE.md
+    ├── AUTOMATIC_JIG_PLACEMENT.md
+    ├── ENGINEERING_LESSONS.md
+    ├── RESULTS.md
+    └── GALLERY.md
 ```
 
-with the remaining gripper joints linked mechanically through mimic relationships.
+---
 
-## Simulation Grasping
+## Getting started
 
-A Gazebo LinkAttacher plugin is used to simulate picking up and releasing jigs.
+The project was developed on **Ubuntu 22.04 + ROS 2 Humble**.
 
-A stability issue was found during detach operations, where calling `Joint::Detach()` directly from a ROS callback could crash `gzserver`. The implementation was modified so that detach requests are queued and the actual detach operation runs from Gazebo's update thread.
+Once the source packages are cloned into a ROS 2 workspace:
 
-That change significantly improved simulation stability during repeated automatic placements.
+```bash
+source /opt/ros/humble/setup.bash
+cd ~/robot_arm_ws
 
-## Current Status
+rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
+colcon build --symlink-install
+source install/setup.bash
+```
 
-The project reached a simulation-validated stage with:
+For the full environment and dependency steps, see:
 
-- full robot and gripper model
-- Gazebo workcell
-- MoveIt planning
-- custom operator GUI
-- automatic jig placement
-- dynamic target discovery
-- runtime IK
-- placed-jig inventory tracking
-- full-table automatic execution
-- STOP / RESUME
+➡️ **[Setup Guide](docs/SETUP.md)**
 
-The project was not physically commissioned as a complete industrial robot cell; the repository represents the CAD, robotics software, simulation, and control development completed during the project.
+---
 
-## Roadmap
+## Documentation
 
-Possible future work includes:
+| Document | What it covers |
+|---|---|
+| [Project Story](docs/PROJECT_STORY.md) | How the project evolved from manufacturing problem to autonomous workcell |
+| [Mechanical Design](docs/MECHANICAL_DESIGN.md) | Structure, materials, torque, reducers, actuators, FEA |
+| [Software Architecture](docs/SOFTWARE_ARCHITECTURE.md) | ROS 2, URDF, MoveIt, Gazebo, ros2_control, GUI |
+| [Automatic Jig Placement](docs/AUTOMATIC_JIG_PLACEMENT.md) | Dynamic targets, IK, full run, inventory and placement logic |
+| [Engineering Lessons](docs/ENGINEERING_LESSONS.md) | Problems encountered and what each one taught |
+| [Results](docs/RESULTS.md) | Demonstrated capabilities and honest project status |
+| [Gallery](docs/GALLERY.md) | Real project screenshots |
+| [Setup](docs/SETUP.md) | Reproducing the ROS 2 environment |
 
-- physical actuator integration
-- EtherCAT / CAN communication
-- real robot hardware interface
-- camera-based target detection
-- automatic workboard calibration
-- TCP calibration tools
-- hand-guided teaching
-- collision/safety validation
-- industrial safety architecture
-- custom robot programming language / teach-pendant workflow
+---
 
-## Notes
+## What this project taught me
 
-This repository is intended as an educational and portfolio reference for robotics, ROS 2, simulation, motion planning, and mechatronics development.
+This project forced several engineering disciplines to work together rather than in isolation:
 
-The project is a development prototype and should not be treated as a certified industrial safety system.
+**mechanical design → FEA → actuator sizing → kinematics → URDF → ROS 2 → planning → control → simulation → GUI → autonomy → debugging**
+
+Some of the most valuable work came from failures: gearbox interference, flexible links, duplicate planning processes, stale state, controller timing, poor IK branches, reused jig inventory and simulator threading crashes.
+
+➡️ **[Read the engineering lessons](docs/ENGINEERING_LESSONS.md)**
+
+---
+
+## Current status & roadmap
+
+### Completed / validated in simulation
+
+- [x] 6-DOF robot CAD
+- [x] gripper CAD and URDF
+- [x] Gazebo simulation
+- [x] MoveIt 2 planning
+- [x] RViz validation
+- [x] ros2_control integration
+- [x] custom Python GUI
+- [x] saved poses and sequences
+- [x] digital I/O logic
+- [x] runtime IK
+- [x] dynamic target discovery
+- [x] autonomous single placement
+- [x] full-table automatic execution
+- [x] immediate STOP / RESUME
+
+### Future work
+
+- [ ] physical actuator integration
+- [ ] EtherCAT / CAN hardware interface
+- [ ] real robot calibration
+- [ ] camera-based target recognition
+- [ ] automatic workplane calibration
+- [ ] hand-guided teaching
+- [ ] physical payload/stiffness validation
+- [ ] industrial electrical and safety architecture
+- [ ] complete cell commissioning
+
+---
+
+## Internship context & authorship
+
+This repository documents the robot design, ROS 2 stack, simulation, control GUI and automatic-placement engineering work developed during a broader internship project.
+
+The internship project involved a team and supervision; this repository focuses on the technical robotics work represented here and is presented as an educational/portfolio reference rather than as a claim that every part of the wider internship project was completed by one person.
+
+---
 
 ## Author
 
-**Yousef El-Beltagy**
+**Yousef El-Beltagy**  
+Robotics & Mechatronics
 
-Robotics / Mechatronics Project
+If this project helps you learn ROS 2, robot modeling, MoveIt or simulation, feel free to explore the code and documentation.
+
+---
+
+<div align="center">
+
+### CAD. SIMULATE. PLAN. CONTROL. AUTOMATE.
+
+</div>
