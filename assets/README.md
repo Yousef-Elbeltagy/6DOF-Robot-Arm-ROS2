@@ -1,18 +1,17 @@
-# Project Media
+# Screenshot Assets
 
-This folder is reserved for **real project screenshots, CAD captures and simulation images** from the robot-arm development work.
+These images were extracted from the project's own presentation material and originate from real project screenshots/CAD/simulation captures supplied during development.
 
-The public README references images under `assets/screenshots/`.
+They are intended for the public GitHub project page.
 
-The intended gallery includes:
-
+Included:
 - SolidWorks robot CAD
+- CAD/URDF exporter view
 - FEA result
-- CAD-to-URDF exporter screenshot
-- Gazebo simulation screenshot
-- MoveIt/RViz validation screenshot
-- custom Python GUI/manual control
-- sequence-programming interface
-- automatic jig-placement GUI
+- Gazebo robot simulation
+- MoveIt/RViz validation
+- Python GUI/manual-control walkthrough
+- Sequence programming walkthrough
+- Automatic jig-placement GUI workflow
 
-The images used for this repository are taken from the project's own screenshots/presentation captures. AI-generated illustrative robot imagery is intentionally excluded from the repository gallery.
+No image-generation artwork is included in this folder.
