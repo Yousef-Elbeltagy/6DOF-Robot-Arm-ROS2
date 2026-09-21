@@ -10,6 +10,9 @@ Use this page as the map for the project documentation.
 | Reproduce the project from a clean machine | [REPRODUCE_PROJECT.md](REPRODUCE_PROJECT.md) |
 | Continue development from the current state | [CONTINUE_DEVELOPMENT.md](CONTINUE_DEVELOPMENT.md) |
 | Diagnose runtime/build problems | [TROUBLESHOOTING.md](TROUBLESHOOTING.md) |
+| Inspect native/neutral CAD | [../cad/README.md](../cad/README.md) |
+| See planned next engineering phases | [../ROADMAP.md](../ROADMAP.md) |
+| Review public project milestones | [../CHANGELOG.md](../CHANGELOG.md) |
 | Contribute changes | [../CONTRIBUTING.md](../CONTRIBUTING.md) |
 
 ## Engineering documentation
@@ -25,7 +28,16 @@ Use this page as the map for the project documentation.
 | Engineering lessons | [ENGINEERING_LESSONS.md](ENGINEERING_LESSONS.md) |
 | Demonstrated results and current status | [RESULTS.md](RESULTS.md) |
 | Screenshots | [GALLERY.md](GALLERY.md) |
-| Original setup notes | [SETUP.md](SETUP.md) |
+| Setup details | [SETUP.md](SETUP.md) |
+
+## Mechanical source packages
+
+The `cad/` directory contains:
+
+- native SolidWorks archives for the robot/gripper, jigs, and workcell tables,
+- a neutral STEP archive containing the complete workcell and separate component STEP exports.
+
+See [../cad/README.md](../cad/README.md) before modifying or redistributing mechanical source files.
 
 ## Recommended reading order for a new developer
 
@@ -45,4 +57,8 @@ CONTINUE_DEVELOPMENT
 TROUBLESHOOTING as needed
 ```
 
-For mechanical continuation, also read `MECHANICAL_DESIGN.md` and `BOM.md` before changing link geometry or actuator selection.
+For mechanical continuation, also read `MECHANICAL_DESIGN.md`, `BOM.md`, and `../cad/README.md` before changing link geometry or actuator selection.
+
+## Status language
+
+The public repository represents a **simulation-validated engineering prototype**. Do not describe the project as a fully commissioned or certified industrial/collaborative robot unless future physical testing and safety validation support that claim.
