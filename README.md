@@ -260,7 +260,48 @@ The repository gallery uses **real project CAD, simulation and GUI screenshots**
 
 ![SolidWorks robot CAD](assets/screenshots/cad_robot_overview.png)
 
-### Gazebo simulation and MoveIt/RViz validation
+#
+<!-- MECHANICAL_DESIGN_SECTION_START -->
+## Mechanical design
+
+Before the ROS 2 simulation and control stack was integrated, the project was developed as a full **mechanical robot-arm design** in CAD.  
+This stage focused on the arm structure, cylindrical link architecture, joint interfaces, packaging, and full assembly feasibility from the base to the gripper.
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/mech_internal_structure.png" width="100%"><br>
+      <sub><b>Internal structural concept</b><br>Early internal support/rib concept with motion reference geometry inside the link.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/mech_link_shell_closed.png" width="100%"><br>
+      <sub><b>Cylindrical link shell concept</b><br>Outer link-shell design showing the smooth cylindrical body and end interface layout.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/mech_link_shell_open.png" width="100%"><br>
+      <sub><b>Joint-side CAD view</b><br>Alternate link-shell view showing flange details and mounting-hole integration.</sub>
+    </td>
+    <td align="center" width="50%">
+      <img src="assets/screenshots/mech_full_arm_transparent.png" width="100%"><br>
+      <sub><b>Transparent full-arm assembly</b><br>Assembly-level packaging view showing how joints, transmissions, and the gripper fit within the arm.</sub>
+    </td>
+  </tr>
+</table>
+
+### Mechanical design highlights
+- **6-DOF collaborative arm architecture** with a cylindrical-link mechanical layout.
+- **CAD-based structural development** for the links, joints, and gripper integration.
+- **Interface-focused design** for motor, bearing, and gearbox/joint packaging.
+- **Transparent assembly validation** to inspect internal arrangement and component fit.
+- **Manufacturability-oriented iteration**, including exploration of internal support concepts and simplified final shells.
+
+This mechanical-design phase formed the foundation for the later **URDF conversion, Gazebo simulation, MoveIt 2 motion planning, and GUI-based control workflow**.
+<!-- MECHANICAL_DESIGN_SECTION_END -->
+
+
+## Gazebo simulation and MoveIt/RViz validation
 
 <table>
 <tr>
