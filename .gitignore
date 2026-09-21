@@ -32,6 +32,10 @@ Thumbs.db
 *.tar.gz
 *.7z
 
+# Published CAD archives are intentional repository assets
+!cad/Solidworks_Cad_models/*.zip
+!cad/STEP_Exports/*.zip
+
 # Local runtime/config snapshots
 robot_gui_runtime.log
 gazebo_crash_capture.log
