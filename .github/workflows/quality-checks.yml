@@ -13,7 +13,17 @@ jobs:
 
       - name: Python syntax check
         run: |
-          python3 -m compileall -q src/robot_arm_python/robot_arm_python
+          python3 - <<'PY'
+          from pathlib import Path
+          import ast
+
+          files = sorted(Path('src/robot_arm_python/robot_arm_python').rglob('*.py'))
+          if not files:
+              raise SystemExit('No Python source files found')
+          for path in files:
+              ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+              print(f'OK: {path}')
+          PY
 
       - name: Shell syntax check
         run: |
