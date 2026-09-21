@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail
 
 WS="${ROBOT_ARM_WS:-$HOME/robot_arm_ws}"
 
@@ -8,8 +8,11 @@ if [[ ! -f /opt/ros/humble/setup.bash ]]; then
   exit 1
 fi
 
+# ROS environment setup scripts are not guaranteed to be nounset-safe.
+# Source them before enabling `set -u`.
 # shellcheck disable=SC1091
 source /opt/ros/humble/setup.bash
+set -u
 
 if [[ ! -d "$WS/src" ]]; then
   echo "Workspace source directory not found: $WS/src" >&2
