@@ -9,9 +9,12 @@
 [![Gazebo](https://img.shields.io/badge/Gazebo-Classic%2011-F58113)](https://classic.gazebosim.org/)
 [![MoveIt](https://img.shields.io/badge/MoveIt-2-2D9CDB)](https://moveit.picknik.ai/)
 [![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Repository quality checks](https://github.com/Yousef-Elbeltagy/6DOF-Robot-Arm-ROS2/actions/workflows/quality-checks.yml/badge.svg)](https://github.com/Yousef-Elbeltagy/6DOF-Robot-Arm-ROS2/actions/workflows/quality-checks.yml)
 ![Status](https://img.shields.io/badge/Status-Simulation--Validated-success)
 
 **A 6-axis robot arm developed from SolidWorks CAD into a complete ROS 2 simulation, programming, and autonomous jig-placement system.**
+
+**[Quick Start](QUICKSTART.md) · [Documentation](docs/README.md) · [CAD Files](cad/README.md) · [Roadmap](ROADMAP.md) · [Changelog](CHANGELOG.md)**
 
 </div>
 
@@ -23,7 +26,7 @@
 |---|---|
 | **Robot** | 6-DOF articulated arm + custom gripper |
 | **Design target** | ~1.5 m reach, ~10 kg payload |
-| **Mechanical CAD** | SolidWorks |
+| **Mechanical CAD** | SolidWorks native source + STEP interoperability exports |
 | **Main structure** | 6061-T6 aluminum |
 | **Robot model** | URDF + STL meshes |
 | **Robotics stack** | ROS 2 Humble, MoveIt 2, RViz 2, ros2_control |
@@ -31,6 +34,7 @@
 | **Control application** | Custom Python/Tkinter GUI |
 | **Programming** | Saved poses, PTP/LIN sequences, blending, digital I/O, gripper actions |
 | **Autonomy** | Runtime IK, dynamic TF targets, full-table jig placement |
+| **Public validation** | Environment check, clean public build, and full simulation launch verified |
 | **Development context** | Robotics / Mechatronics internship project |
 
 > The final system is a **simulation-validated engineering prototype**. The physical six-axis arm was not fully commissioned during the project period because the selected integrated joint modules had a long procurement lead time.
@@ -112,7 +116,8 @@ The project started as a full mechanical robot-arm design in SolidWorks. The ear
 - Final link strategy used simpler unribbed shells with wall thickness, geometry, local reinforcement, housings, and smooth transitions carrying the structural load.
 - Custom cycloidal and planetary/belt reduction concepts were studied before integrated joint modules became the final actuator direction.
 
-➡️ **[Mechanical design details](docs/MECHANICAL_DESIGN.md)**
+➡️ **[Mechanical design details](docs/MECHANICAL_DESIGN.md)**  
+➡️ **[Native SolidWorks + STEP CAD packages](cad/README.md)**
 
 ---
 
@@ -460,39 +465,47 @@ Each of these problems changed the design or software architecture rather than b
 ```text
 6DOF-Robot-Arm-ROS2/
 ├── README.md
+├── QUICKSTART.md
+├── CHANGELOG.md
+├── ROADMAP.md
+├── LICENSE
+├── NOTICE
+├── CONTRIBUTING.md
 ├── src/                         # ROS 2 source packages
-├── scripts/                     # startup scripts
+├── scripts/                     # dependency, build, validation and startup helpers
 ├── config/                      # TCP and saved-pose configuration
+├── cad/
+│   ├── README.md                # CAD package map and interoperability notes
+│   ├── Solidworks_Cad_models/   # native SolidWorks archives
+│   └── STEP_Exports/            # neutral STEP workcell/components archive
 ├── assets/
 │   └── screenshots/             # real CAD, simulation and GUI screenshots
-└── docs/
-    ├── SETUP.md
-    ├── PROJECT_STORY.md
-    ├── MECHANICAL_DESIGN.md
-    ├── SOFTWARE_ARCHITECTURE.md
-    ├── SEQUENCE_PROGRAMMING.md
-    ├── AUTOMATIC_JIG_PLACEMENT.md
-    ├── ENGINEERING_LESSONS.md
-    ├── RESULTS.md
-    └── GALLERY.md
+└── docs/                        # engineering, setup and continuation documentation
 ```
 
 ---
 
 ## Getting started
 
-The project was developed on **Ubuntu 22.04 + ROS 2 Humble**.
+The validated public baseline is **Ubuntu 22.04 + ROS 2 Humble**. The repository itself is the workspace and already contains `src/`.
 
 ```bash
-source /opt/ros/humble/setup.bash
+cd ~
+git clone https://github.com/Yousef-Elbeltagy/6DOF-Robot-Arm-ROS2.git robot_arm_ws
 cd ~/robot_arm_ws
 
-rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
-colcon build --symlink-install
-source install/setup.bash
+bash scripts/setup_dependencies.sh
+bash scripts/build_workspace.sh
+
+cp config/robot_arm_saved_poses.json ~/robot_arm_saved_poses.json
+cp config/robot_arm_tcp_config.json ~/robot_arm_tcp_config.json
+
+bash scripts/check_system.sh
+bash scripts/start_robot.sh
 ```
 
-➡️ **[Setup Guide](docs/SETUP.md)**
+➡️ **[Quick Start](QUICKSTART.md)**  
+➡️ **[Full reproduction guide](docs/REPRODUCE_PROJECT.md)**
 
 ---
 
@@ -500,15 +513,23 @@ source install/setup.bash
 
 | Document | What it covers |
 |---|---|
+| [Quick Start](QUICKSTART.md) | Shortest validated path from clone to launch |
+| [Documentation Index](docs/README.md) | Map of all engineering and reproduction docs |
+| [Reproduce Project](docs/REPRODUCE_PROJECT.md) | Clean-machine reproduction workflow |
 | [Project Story](docs/PROJECT_STORY.md) | Evolution from manufacturing problem to autonomous workcell |
 | [Mechanical Design](docs/MECHANICAL_DESIGN.md) | Structure, materials, torque, reducers, actuators, FEA |
+| [CAD Packages](cad/README.md) | Native SolidWorks archives and STEP interoperability exports |
 | [Software Architecture](docs/SOFTWARE_ARCHITECTURE.md) | ROS 2, URDF, MoveIt, Gazebo, ros2_control, GUI |
 | [Sequence Programming](docs/SEQUENCE_PROGRAMMING.md) | Waypoints, PTP/LIN, blending, I/O, gripper barriers, STOP/RESUME |
 | [Automatic Jig Placement](docs/AUTOMATIC_JIG_PLACEMENT.md) | Dynamic targets, runtime IK, full run, inventory and placement logic |
 | [Engineering Lessons](docs/ENGINEERING_LESSONS.md) | Problems encountered and how they changed the system |
 | [Results](docs/RESULTS.md) | Demonstrated capabilities and project status |
 | [Gallery](docs/GALLERY.md) | Real project screenshots |
-| [Setup](docs/SETUP.md) | Reproducing the ROS 2 environment |
+| [Setup](docs/SETUP.md) | Detailed ROS 2 environment setup |
+| [Troubleshooting](docs/TROUBLESHOOTING.md) | Build/runtime diagnosis |
+| [Continue Development](docs/CONTINUE_DEVELOPMENT.md) | Safe continuation path for future developers |
+| [Roadmap](ROADMAP.md) | Physical integration, vision, calibration, safety and commissioning |
+| [Changelog](CHANGELOG.md) | Major public repository milestones |
 
 ---
 
@@ -537,6 +558,11 @@ source install/setup.bash
 - [x] autonomous single placement
 - [x] full-table automatic execution
 - [x] immediate automatic STOP / RESUME
+- [x] native SolidWorks CAD publication
+- [x] neutral STEP workcell/component exports
+- [x] public repository environment check
+- [x] public repository build validation
+- [x] public Gazebo / MoveIt / RViz / GUI launch validation
 
 ### Future work
 
@@ -549,6 +575,8 @@ source install/setup.bash
 - [ ] physical payload/stiffness validation
 - [ ] industrial electrical and safety architecture
 - [ ] complete cell commissioning
+
+➡️ **[Detailed roadmap](ROADMAP.md)**
 
 ---
 
