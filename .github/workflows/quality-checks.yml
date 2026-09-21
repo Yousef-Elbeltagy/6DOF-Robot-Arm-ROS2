@@ -37,15 +37,28 @@ jobs:
         run: |
           test -f README.md
           test -f QUICKSTART.md
+          test -f CHANGELOG.md
+          test -f ROADMAP.md
           test -f LICENSE
           test -f NOTICE
           test -f CONTRIBUTING.md
+          test -f docs/README.md
           test -f docs/REPRODUCE_PROJECT.md
           test -f docs/CONTINUE_DEVELOPMENT.md
           test -f docs/TROUBLESHOOTING.md
           test -f docs/BOM.md
+          test -f cad/README.md
           test -f scripts/check_system.sh
+          test -f scripts/setup_dependencies.sh
+          test -f scripts/build_workspace.sh
           test -f scripts/start_robot.sh
+
+      - name: Check published CAD packages
+        run: |
+          test -f cad/Solidworks_Cad_models/full_Cobot_Solidworks_Cad.zip
+          test -f cad/Solidworks_Cad_models/Cobot_Jigs_Solidworks_Cad.zip
+          test -f cad/Solidworks_Cad_models/Pick_Table_Solidworks_Cad.zip
+          test -f cad/STEP_Exports/Complete_Robot_Workcell_STEP_Components.zip
 
       - name: Check for common generated artifacts
         run: |
