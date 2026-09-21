@@ -2,7 +2,7 @@
 
 # 6DOF Robot Arm — ROS 2
 
-### Mechanical design → digital twin → motion planning → custom control → autonomous jig placement
+### Mechanical design → digital twin → motion planning → sequence programming → autonomous jig placement
 
 [![ROS 2](https://img.shields.io/badge/ROS%202-Humble-22314E?logo=ros)](https://docs.ros.org/en/humble/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04-E95420?logo=ubuntu&logoColor=white)](https://ubuntu.com/)
@@ -11,7 +11,7 @@
 [![Python](https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 ![Status](https://img.shields.io/badge/Status-Simulation--Validated-success)
 
-**A 6-axis robot arm developed from SolidWorks CAD into a complete ROS 2 simulation and control system for automated wire-harness jig placement.**
+**A 6-axis robot arm developed from SolidWorks CAD into a complete ROS 2 simulation, programming and control system for automated wire-harness jig placement.**
 
 </div>
 
@@ -28,6 +28,7 @@
 | **Robotics stack** | ROS 2 Humble, MoveIt 2, RViz 2, ros2_control |
 | **Simulation** | Gazebo Classic 11 |
 | **Control application** | Custom Python/Tkinter GUI |
+| **Programming** | Saved poses, multi-waypoint sequences, PTP/LIN, blending, digital I/O, gripper actions |
 | **Autonomy** | Runtime IK, dynamic TF targets, full-table jig placement |
 | **Development context** | Robotics / Mechatronics internship project |
 
@@ -37,11 +38,11 @@
 
 ## Why this project exists
 
-Wire-harness assembly can depend on dedicated boards and fixed jig layouts for each product or variant. That creates three practical problems:
+Wire-harness assembly can depend on dedicated boards and fixed jig layouts for each product or variant. That creates practical problems:
 
-- **slow changeovers** when the product changes,
-- **storage overhead** from dedicated boards,
-- **limited flexibility** when new layouts are introduced.
+- slow product changeovers,
+- storage overhead from dedicated boards,
+- limited flexibility when new layouts are introduced.
 
 The concept explored here is a reusable workboard with modular jigs. Instead of rebuilding the board, a robot selects the required jig from a source table and places it at the correct target location automatically.
 
@@ -54,7 +55,7 @@ The long-term vision is a flexible cell where a camera reads a harness layout, i
 ```text
 Mechanical design in SolidWorks
               ↓
-     Mass / inertia / joint axes
+     FEA / torque / actuators
               ↓
         URDF + STL meshes
               ↓
@@ -63,14 +64,16 @@ Mechanical design in SolidWorks
    ┌──────────┴──────────┐
    ↓                     ↓
 Gazebo Classic        MoveIt 2
-physics / workcell    IK / planning
+physics/workcell      IK/planning
    └──────────┬──────────┘
               ↓
          ros2_control
               ↓
       Python/Tkinter GUI
               ↓
-  manual control + sequences
+ manual control + saved poses
+              ↓
+      sequence programming
               ↓
    automatic jig placement
 ```
@@ -111,11 +114,19 @@ physics / workcell    IK / planning
 - configurable Tool Center Point
 - saved robot poses
 - gripper open/close control
-- sequence programming
-- STOP / CONTINUE waypoint behavior
+
+### Sequence programming
+
+- ordered saved-waypoint programs
+- `STOP` / `CONTINUE` waypoint behavior
 - blend radius
-- PTP / LIN motion selection
-- digital input/output logic
+- `PTP` / `LIN` motion selection
+- digital input conditions
+- digital output actions
+- `BEFORE` / `AFTER` I/O timing
+- synchronized gripper commands
+- sequence STOP / RESUME controls
+- MoveIt action and ros2_control execution handling
 
 ### Autonomous workcell
 
@@ -130,6 +141,89 @@ physics / workcell    IK / planning
 - placement validation
 - full-table automatic run
 - immediate STOP / RESUME
+
+---
+
+# Sequence Programming & Execution
+
+The **Sequence Controller** is one of the most important and most time-intensive software features in this project.
+
+It is the point where the robot evolved from a system that could be manually jogged to a system that could be **programmed as an ordered robotic process**.
+
+![Sequence Programming GUI](assets/screenshots/gui_sequence_programming.png)
+
+Each program row can define:
+
+| Sequence field | Function |
+|---|---|
+| **Waypoint** | Saved robot pose |
+| **Behavior** | `STOP` or `CONTINUE` |
+| **Blend Radius** | Continuous transition through eligible poses |
+| **Motion** | `PTP` or `LIN` |
+| **Input** | Optional digital input condition |
+| **Input Timing** | Check input `BEFORE` or `AFTER` the waypoint |
+| **Output** | Digital output or gripper action |
+| **Output Timing** | Execute `BEFORE` or `AFTER` the waypoint |
+
+### Industrial-style workflow
+
+```text
+Teach / save poses
+        ↓
+Build ordered waypoint list
+        ↓
+Choose STOP or CONTINUE
+        ↓
+Set blend radius
+        ↓
+Select PTP or LIN
+        ↓
+Add I/O and gripper actions
+        ↓
+Execute through MoveIt 2
+        ↓
+FollowJointTrajectory controller
+        ↓
+ros2_control → Gazebo robot
+```
+
+### Gripper synchronization barrier
+
+One difficult problem was ensuring the arm did **not** continue to the next waypoint while the gripper was still moving.
+
+The final execution model is:
+
+```text
+arm motion segment
+      ↓
+stop at gripper waypoint
+      ↓
+send gripper trajectory
+      ↓
+wait for real controller result
+      ↓
+continue next arm segment
+```
+
+This avoids asynchronous arm/gripper overlap and makes the programmed routine deterministic.
+
+### Sequence bugs that had to be solved
+
+The sequence work exposed several non-trivial ROS/MoveIt issues:
+
+- parts of the code were unintentionally forcing all motion types to `PTP`, even when the GUI row was set to `LIN`,
+- an intermediate segmentation edit introduced an undefined `segment_end`,
+- duplicate `move_group` processes caused confusing sequence-action behavior,
+- LIN/Pilz planning exposed acceleration/start-state and IK constraints,
+- cached gripper feedback could lag behind the actual controller state,
+- action acceptance had to be distinguished from actual execution completion,
+- gripper commands needed explicit barriers so the next arm segment could not start early.
+
+PTP became the most thoroughly validated sequence motion mode; LIN remains available as part of the intended industrial programming model and was developed/tested extensively, but it proved more sensitive to planner and start-state constraints.
+
+The sequence controller became an important foundation for the later automatic jig-placement architecture because it forced the project to solve robust motion execution, action handling, cancellation, I/O timing and gripper synchronization first.
+
+➡️ **[Read the full Sequence Programming & Execution documentation](docs/SEQUENCE_PROGRAMMING.md)**
 
 ---
 
@@ -181,7 +275,7 @@ The robot was designed around a target reach of approximately **1.5 m** and a ta
 
 The main moving structure uses **6061-T6 aluminum** to keep link mass low while retaining practical machinability and strength.
 
-The mechanical design evolved through several iterations:
+The design evolved through:
 
 1. cylindrical/tapered hollow links,
 2. internal-rib concepts,
@@ -211,8 +305,6 @@ J2 became the governing axis because it carries the downstream links, wrist, gri
 | J3 | TD-100-142 | 169 N·m | 411 N·m |
 | J4-J6 | TD-70-90 | 50 N·m | 102 N·m |
 
-The integrated modules combine the motor, encoder, brake and precision reducer, avoiding the schedule and manufacturing risk of six custom gearboxes.
-
 ➡️ **[Mechanical design details](docs/MECHANICAL_DESIGN.md)**
 
 ---
@@ -221,7 +313,7 @@ The integrated modules combine the motor, encoder, brake and precision reducer, 
 
 The SolidWorks assembly was prepared with explicit reference coordinate systems and revolute-joint axes before export.
 
-The digital model carries:
+The digital model includes:
 
 - parent/child link hierarchy,
 - joint origins and axes,
@@ -251,41 +343,6 @@ The digital model carries:
 | Build | colcon / ament |
 
 ➡️ **[Software architecture](docs/SOFTWARE_ARCHITECTURE.md)**
-
----
-
-## Custom Python robot controller
-
-The GUI became a full operator interface rather than a simple test panel.
-
-It supports both manual and programmed robot operation:
-
-```text
-Manual control
-├── Cartesian jog: X / Y / Z
-├── Orientation jog: Roll / Pitch / Yaw
-├── Joint jog: J1 ... J6
-├── Speed override
-├── WORLD / FLANGE / TOOL frames
-├── TCP configuration
-└── Gripper control
-
-Programming
-├── Saved poses
-├── Waypoint sequences
-├── STOP / CONTINUE behavior
-├── Blend radius
-├── PTP / LIN selection
-├── Digital inputs
-├── Digital outputs
-└── Gripper actions
-```
-
-The working TCP used by the controller is approximately:
-
-```text
-[0, 0, 0.4193463143, 0, 0, 0]
-```
 
 ---
 
@@ -328,7 +385,7 @@ M2 -> MEDIUM jig
 S1 -> SMALL jig
 ```
 
-Targets are discovered dynamically from TF frame names ending in `_target_link`, rather than relying only on a hard-coded coordinate list.
+Targets are discovered dynamically from TF frame names ending in `_target_link` rather than relying only on a hard-coded coordinate list.
 
 ➡️ **[Automatic jig-placement architecture](docs/AUTOMATIC_JIG_PLACEMENT.md)**
 
@@ -338,7 +395,7 @@ Targets are discovered dynamically from TF frame names ending in `_target_link`,
 
 The autonomous system uses MoveIt's IK service at runtime.
 
-A single target can have several valid joint solutions, and the first mathematical solution is not necessarily a good robot motion. During development, some valid solutions produced large wrist flips.
+A target can have several valid joint solutions, and the first mathematical solution is not necessarily a good robot motion. During development, some valid solutions produced large wrist flips.
 
 The controller therefore:
 
@@ -352,29 +409,24 @@ This solved the wrist-branch problem generically instead of adding target-specif
 
 ---
 
-## Full-table autonomy & STOP / RESUME
+## Full-table autonomy & immediate STOP / RESUME
 
-The full-run mode can process the available target set without manual reselection.
-
-Two explicit state trackers make this possible:
+Two state trackers make repeatable full-table execution possible:
 
 ```python
 placed_jig_models
 filled_placement_targets
 ```
 
-They prevent:
+They prevent both reusing a jig that has already been placed and sending another jig to an occupied target.
 
-- reusing a jig that has already been placed,
-- sending another jig to an already occupied target.
-
-The STOP button was also upgraded from a simple software flag into an immediate motion interruption. It cancels both the active MoveIt goal and the arm-controller trajectory. RESUME retries the interrupted automatic step from the robot's current state.
+The automatic STOP path was upgraded from a simple software flag into actual motion interruption: it cancels both the active MoveIt sequence goal and the active arm-controller trajectory. RESUME retries the interrupted automatic step from the robot's current state.
 
 ---
 
-## A debugging problem worth highlighting: Gazebo detach crash
+## Debugging highlight: Gazebo detach crash
 
-One of the most difficult failures was a native `gzserver` crash during jig release.
+One of the hardest failures was a native `gzserver` crash during jig release.
 
 The issue was traced to physics/joint manipulation occurring from a ROS service callback thread. The LinkAttacher implementation was changed so that:
 
@@ -390,8 +442,6 @@ Joint::Detach()
 
 Executing the actual detach operation on Gazebo's update thread significantly improved repeated pick-and-place stability.
 
-This is a good example of why robotics debugging often spans application logic, middleware, controller timing and simulator internals at the same time.
-
 ---
 
 ## FEA and stiffness
@@ -402,8 +452,6 @@ Structural analysis produced two important lessons:
 - a robot can be strong enough not to yield while still being too flexible for accurate positioning.
 
 ![FEA stress result](assets/screenshots/fea_stress_result.png)
-
-The design therefore considered both von Mises stress **and** end-effector displacement, rather than treating factor of safety as the only metric.
 
 ---
 
@@ -422,6 +470,7 @@ The design therefore considered both von Mises stress **and** end-effector displ
     ├── PROJECT_STORY.md
     ├── MECHANICAL_DESIGN.md
     ├── SOFTWARE_ARCHITECTURE.md
+    ├── SEQUENCE_PROGRAMMING.md
     ├── AUTOMATIC_JIG_PLACEMENT.md
     ├── ENGINEERING_LESSONS.md
     ├── RESULTS.md
@@ -434,8 +483,6 @@ The design therefore considered both von Mises stress **and** end-effector displ
 
 The project was developed on **Ubuntu 22.04 + ROS 2 Humble**.
 
-Once the source packages are cloned into a ROS 2 workspace:
-
 ```bash
 source /opt/ros/humble/setup.bash
 cd ~/robot_arm_ws
@@ -444,8 +491,6 @@ rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
 colcon build --symlink-install
 source install/setup.bash
 ```
-
-For the full environment and dependency steps, see:
 
 ➡️ **[Setup Guide](docs/SETUP.md)**
 
@@ -458,6 +503,7 @@ For the full environment and dependency steps, see:
 | [Project Story](docs/PROJECT_STORY.md) | How the project evolved from manufacturing problem to autonomous workcell |
 | [Mechanical Design](docs/MECHANICAL_DESIGN.md) | Structure, materials, torque, reducers, actuators, FEA |
 | [Software Architecture](docs/SOFTWARE_ARCHITECTURE.md) | ROS 2, URDF, MoveIt, Gazebo, ros2_control, GUI |
+| **[Sequence Programming](docs/SEQUENCE_PROGRAMMING.md)** | **Waypoint programming, PTP/LIN, blending, I/O, gripper barriers and sequence debugging** |
 | [Automatic Jig Placement](docs/AUTOMATIC_JIG_PLACEMENT.md) | Dynamic targets, IK, full run, inventory and placement logic |
 | [Engineering Lessons](docs/ENGINEERING_LESSONS.md) | Problems encountered and what each one taught |
 | [Results](docs/RESULTS.md) | Demonstrated capabilities and honest project status |
@@ -470,9 +516,9 @@ For the full environment and dependency steps, see:
 
 This project forced several engineering disciplines to work together rather than in isolation:
 
-**mechanical design → FEA → actuator sizing → kinematics → URDF → ROS 2 → planning → control → simulation → GUI → autonomy → debugging**
+**mechanical design → FEA → actuator sizing → kinematics → URDF → ROS 2 → planning → control → sequence programming → simulation → GUI → autonomy → debugging**
 
-Some of the most valuable work came from failures: gearbox interference, flexible links, duplicate planning processes, stale state, controller timing, poor IK branches, reused jig inventory and simulator threading crashes.
+Some of the most valuable work came from failures: gearbox interference, flexible links, duplicate planning processes, sequence execution bugs, stale state, controller timing, poor IK branches, reused jig inventory and simulator-threading crashes.
 
 ➡️ **[Read the engineering lessons](docs/ENGINEERING_LESSONS.md)**
 
@@ -489,13 +535,18 @@ Some of the most valuable work came from failures: gearbox interference, flexibl
 - [x] RViz validation
 - [x] ros2_control integration
 - [x] custom Python GUI
-- [x] saved poses and sequences
-- [x] digital I/O logic
+- [x] saved poses
+- [x] multi-waypoint sequence programming
+- [x] STOP / CONTINUE waypoint behavior
+- [x] blend radius
+- [x] PTP / LIN sequence selection
+- [x] digital I/O sequence logic
+- [x] synchronized gripper sequence actions
 - [x] runtime IK
 - [x] dynamic target discovery
 - [x] autonomous single placement
 - [x] full-table automatic execution
-- [x] immediate STOP / RESUME
+- [x] immediate automatic STOP / RESUME
 
 ### Future work
 
@@ -513,7 +564,7 @@ Some of the most valuable work came from failures: gearbox interference, flexibl
 
 ## Internship context & authorship
 
-This repository documents the robot design, ROS 2 stack, simulation, control GUI and automatic-placement engineering work developed during a broader internship project.
+This repository documents the robot design, ROS 2 stack, simulation, control GUI, sequence-programming system and automatic-placement engineering work developed during a broader internship project.
 
 The internship project involved a team and supervision; this repository focuses on the technical robotics work represented here and is presented as an educational/portfolio reference rather than as a claim that every part of the wider internship project was completed by one person.
 
@@ -524,12 +575,12 @@ The internship project involved a team and supervision; this repository focuses 
 **Yousef El-Beltagy**  
 Robotics & Mechatronics
 
-If this project helps you learn ROS 2, robot modeling, MoveIt or simulation, feel free to explore the code and documentation.
+If this project helps you learn ROS 2, robot modeling, MoveIt, robot programming or simulation, feel free to explore the code and documentation.
 
 ---
 
 <div align="center">
 
-### CAD. SIMULATE. PLAN. CONTROL. AUTOMATE.
+### CAD. SIMULATE. PLAN. PROGRAM. CONTROL. AUTOMATE.
 
 </div>
