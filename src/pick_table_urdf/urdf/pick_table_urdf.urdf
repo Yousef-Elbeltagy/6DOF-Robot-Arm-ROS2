@@ -1,0 +1,687 @@
+<?xml version="1.0"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: v1.6.1-dev1-4-g75b5c6a  Build Version: 1.6.9609.37988
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="pick_table_urdf">
+  <link
+    name="pick_table_base_link">
+    <inertial>
+      <origin
+        xyz="-1.8874E-15 0.00024765 0.17551"
+        rpy="0 0 0" />
+      <mass
+        value="7.6559" />
+      <inertia
+        ixx="0.19996"
+        ixy="4.867E-16"
+        ixz="1.5744E-15"
+        iyy="0.16004"
+        iyz="6.6394E-05"
+        izz="0.11665" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/pick_table_base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/pick_table_base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="l_pick_1_link">
+    <inertial>
+      <origin
+        xyz="-1.11022302462516E-16 0 -0.0015"
+        rpy="0 0 0" />
+      <mass
+        value="0.00376991118430776" />
+      <inertia
+        ixx="3.79818551819006E-07"
+        ixy="-1.50463276905253E-36"
+        ixz="2.18556993607744E-40"
+        iyy="3.79818551819006E-07"
+        iyz="2.86985925493726E-40"
+        izz="7.53982236861551E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/l_pick_1_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/l_pick_1_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="l_pick_1_joint  "
+    type="fixed">
+    <origin
+      xyz="-0.2005 -0.12 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="l_pick_1_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="l_pick_2_link">
+    <inertial>
+      <origin
+        xyz="0 -2.77555756156289E-17 -0.0015"
+        rpy="0 0 0" />
+      <mass
+        value="0.00376991118430776" />
+      <inertia
+        ixx="3.79818551819006E-07"
+        ixy="2.15066959263817E-24"
+        ixz="-1.32348898008484E-24"
+        iyy="3.79818551819006E-07"
+        iyz="-2.25758770713994E-38"
+        izz="7.53982236861551E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/l_pick_2_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/l_pick_2_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="l_pick_2_joint  "
+    type="fixed">
+    <origin
+      xyz="-0.2005 -0.04 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="l_pick_2_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="l_pick_3_link">
+    <inertial>
+      <origin
+        xyz="0 -2.77555756156289E-17 -0.0015"
+        rpy="0 0 0" />
+      <mass
+        value="0.00376991118430776" />
+      <inertia
+        ixx="3.79818551819006E-07"
+        ixy="-5.1946942468331E-23"
+        ixz="1.32348898008486E-24"
+        iyy="3.79818551819006E-07"
+        iyz="-1.32348898008483E-24"
+        izz="7.53982236861551E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/l_pick_3_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/l_pick_3_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="l_pick_3_joint  "
+    type="fixed">
+    <origin
+      xyz="-0.2005 0.04 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="l_pick_3_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="l_pick_4_link">
+    <inertial>
+      <origin
+        xyz="-2.22044604925031E-16 0 -0.0015"
+        rpy="0 0 0" />
+      <mass
+        value="0.00376991118430776" />
+      <inertia
+        ixx="3.79818551819006E-07"
+        ixy="4.18553389951835E-23"
+        ixz="4.15867755759411E-40"
+        iyy="3.79818551819006E-07"
+        iyz="-1.79366203433571E-40"
+        izz="7.53982236861551E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/l_pick_4_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/l_pick_4_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="l_pick_4_joint  "
+    type="fixed">
+    <origin
+      xyz="-0.2005 0.12 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="l_pick_4_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="m_pick_1_link">
+    <inertial>
+      <origin
+        xyz="-1.11022302462516E-16 -2.71050543121376E-18 -0.00150000000000006"
+        rpy="0 0 0" />
+      <mass
+        value="0.00212057504117311" />
+      <inertia
+        ixx="1.20872777346867E-07"
+        ixy="-4.63221143029688E-24"
+        ixz="4.13590306276311E-26"
+        iyy="1.20872777346867E-07"
+        iyz="1.32348898008485E-24"
+        izz="2.38564692131975E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/m_pick_1_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/m_pick_1_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="m_pick_1_joint  "
+    type="fixed">
+    <origin
+      xyz="-0.0005 -0.12 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="m_pick_1_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="m_pick_2_link">
+    <inertial>
+      <origin
+        xyz="-1.11022302462516E-16 -8.67361737988404E-19 -0.00150000000000006"
+        rpy="0 0 0" />
+      <mass
+        value="0.00212057504117311" />
+      <inertia
+        ixx="1.20872777346867E-07"
+        ixy="5.95570041038165E-24"
+        ixz="6.61744490042423E-25"
+        iyy="1.20872777346867E-07"
+        iyz="9.42238131884332E-39"
+        izz="2.38564692131975E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/m_pick_2_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/m_pick_2_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="m_pick_2_joint  "
+    type="fixed">
+    <origin
+      xyz="-0.0005 -0.04 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="m_pick_2_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="m_pick_3_link">
+    <inertial>
+      <origin
+        xyz="-1.95156391047391E-18 -1.11022302462516E-16 -0.00150000000000006"
+        rpy="0 0 0" />
+      <mass
+        value="0.00212057504117311" />
+      <inertia
+        ixx="1.20872777346867E-07"
+        ixy="0"
+        ixz="4.27780360058115E-40"
+        iyy="1.20872777346867E-07"
+        iyz="-9.22037316782624E-41"
+        izz="2.38564692131975E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/m_pick_3_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/m_pick_3_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="m_pick_3_joint  "
+    type="fixed">
+    <origin
+      xyz="-0.0005 0.04 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="m_pick_3_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="m_pick_4_link">
+    <inertial>
+      <origin
+        xyz="0 -2.38524477946811E-18 -0.00150000000000006"
+        rpy="0 0 0" />
+      <mass
+        value="0.00212057504117311" />
+      <inertia
+        ixx="1.20872777346867E-07"
+        ixy="-4.50813433841385E-24"
+        ixz="6.61744490042441E-25"
+        iyy="1.20872777346867E-07"
+        iyz="-1.32348898008484E-24"
+        izz="2.38564692131975E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/m_pick_4_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/m_pick_4_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="m_pick_4_joint  "
+    type="fixed">
+    <origin
+      xyz="-0.0005 0.12 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="m_pick_4_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="s_pick_1_link">
+    <inertial>
+      <origin
+        xyz="0 2.77555756156289E-17 -0.0015"
+        rpy="0 0 0" />
+      <mass
+        value="0.000942477796076938" />
+      <inertia
+        ixx="2.42688032489812E-08"
+        ixy="6.04875822929345E-25"
+        ixz="3.30872245021211E-25"
+        iyy="2.42688032489812E-08"
+        iyz="4.99871364475451E-39"
+        izz="4.71238898038469E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/s_pick_1_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/s_pick_1_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="s_pick_1_joint  "
+    type="fixed">
+    <origin
+      xyz="0.1995 -0.12 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="s_pick_1_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="s_pick_2_link">
+    <inertial>
+      <origin
+        xyz="0 -2.77555756156289E-17 -0.0015"
+        rpy="0 0 0" />
+      <mass
+        value="0.000942477796076938" />
+      <inertia
+        ixx="2.42688032489812E-08"
+        ixy="1.23043116117263E-24"
+        ixz="-8.98434814995804E-40"
+        iyy="2.42688032489812E-08"
+        iyz="1.65436122510606E-25"
+        izz="4.71238898038469E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/s_pick_2_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/s_pick_2_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="s_pick_2_joint  "
+    type="fixed">
+    <origin
+      xyz="0.1995 -0.04 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="s_pick_2_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="s_pick_3_link">
+    <inertial>
+      <origin
+        xyz="0 -2.77555756156289E-17 -0.0015"
+        rpy="0 0 0" />
+      <mass
+        value="0.000942477796076939" />
+      <inertia
+        ixx="2.42688032489812E-08"
+        ixy="0"
+        ixz="2.73196242009684E-41"
+        iyy="2.42688032489812E-08"
+        iyz="3.88263788480385E-55"
+        izz="4.71238898038469E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/s_pick_3_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/s_pick_3_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="s_pick_3_joint  "
+    type="fixed">
+    <origin
+      xyz="0.1995 0.04 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="s_pick_3_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="s_pick_4_link">
+    <inertial>
+      <origin
+        xyz="0 0 -0.0015"
+        rpy="0 0 0" />
+      <mass
+        value="0.000942477796076939" />
+      <inertia
+        ixx="2.42688032489812E-08"
+        ixy="1.15805285757424E-24"
+        ixz="2.80259692864963E-40"
+        iyy="2.42688032489812E-08"
+        iyz="-1.09103454646969E-40"
+        izz="4.71238898038469E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/s_pick_4_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="1.57079632679 0 0" />
+      <geometry>
+        <mesh
+          filename="package://pick_table_urdf/meshes/s_pick_4_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="s_pick_4_joint  "
+    type="fixed">
+    <origin
+      xyz="0.1995 0.12 0.3495"
+      rpy="0 0 0" />
+    <parent
+      link="pick_table_base_link" />
+    <child
+      link="s_pick_4_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+<gazebo>
+  <static>true</static>
+</gazebo>
+
+</robot>

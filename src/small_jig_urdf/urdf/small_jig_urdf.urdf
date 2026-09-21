@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: v1.6.1-dev1-4-g75b5c6a  Build Version: 1.6.9609.37988
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="small_jig_urdf">
+  <link
+    name="small_jig_link">
+    <inertial>
+      <origin
+        xyz="1.11022302462516E-16 -2.77555756156289E-17 0.0270284220182594"
+        rpy="0 0 0" />
+      <mass
+        value="0.1" />
+      <inertia
+        ixx="5.1675e-05"
+        ixy="0"
+        ixz="0"
+        iyy="5.165607469e-05"
+        iyz="0"
+        izz="9.581074691e-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://small_jig_urdf/meshes/small_jig_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0.0375"
+        rpy="0 0 0" />
+      <geometry>
+        <box
+          size="0.02395264 0.006 0.075" />
+      </geometry>
+    </collision>
+  </link>
+</robot>

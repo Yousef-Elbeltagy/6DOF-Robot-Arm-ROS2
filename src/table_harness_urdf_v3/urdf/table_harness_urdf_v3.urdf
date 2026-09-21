@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: v1.6.1-dev1-4-g75b5c6a  Build Version: 1.6.9609.37988
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="table_harness_urdf_v3">
+  <link
+    name="table_base_link">
+    <inertial>
+      <origin
+        xyz="2.3567E-05 8.5912E-06 0.1751"
+        rpy="0 0 0" />
+      <mass
+        value="11.54" />
+      <inertia
+        ixx="0.50144"
+        ixy="-1.804E-05"
+        ixz="7.2205E-06"
+        iyy="0.66933"
+        iyz="8.752E-06"
+        izz="0.69513" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 -0.9 0"
+        rpy="1.57079632679 0 3.14159265359" />
+      <geometry>
+        <mesh
+          filename="package://table_harness_urdf_v3/meshes/table_base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 -0.9 0"
+        rpy="1.57079632679 0 3.14159265359" />
+      <geometry>
+        <mesh
+          filename="package://table_harness_urdf_v3/meshes/table_base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="m1_target_link" />
+  <joint
+    name="m1_fixed_joint"
+    type="fixed">
+    <origin
+      xyz="-0.27578 0.2314 0.3525"
+      rpy="0 0 0" />
+    <parent
+      link="table_base_link" />
+    <child
+      link="m1_target_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="m2_target_link" />
+  <joint
+    name="m2_fixed_joint"
+    type="fixed">
+    <origin
+      xyz="-0.191511110779744 -0.160696902421635 0.3525"
+      rpy="0 0 0" />
+    <parent
+      link="table_base_link" />
+    <child
+      link="m2_target_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="s1_target_link" />
+  <joint
+    name="s1_fixed_joint"
+    type="fixed">
+    <origin
+      xyz="-0.0162000258782906 -0.000766044443119007 0.3525"
+      rpy="0 0 0" />
+    <parent
+      link="table_base_link" />
+    <child
+      link="s1_target_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="l1_target_link" />
+  <joint
+    name="l1_fixed_joint"
+    type="fixed">
+    <origin
+      xyz="0.35 0 0.3525"
+      rpy="0 0 0" />
+    <parent
+      link="table_base_link" />
+    <child
+      link="l1_target_link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+    <gazebo>
+    <static>true</static>
+  </gazebo>
+</robot>

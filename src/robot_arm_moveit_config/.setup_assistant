@@ -1,0 +1,10 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: robot_arm_with_gripper_urdf
+    relative_path: urdf/robot_arm_with_gripper_urdf.urdf
+  srdf:
+    relative_path: config/robot_arm.srdf
+  package_settings:
+    author_name: Youssef Elbeltagy
+    author_email: yousefelbeltagy001@gmail.com
+    generated_timestamp: 1788269634
