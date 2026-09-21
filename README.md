@@ -297,17 +297,12 @@ The Sequence Controller allows the operator to build motion logic row by row. Ea
 - **Waypoint** — any saved robot pose  
 - **Behavior** — stop at a waypoint or continue through it  
 - **Blend radius** — smoothing for continuous motion  
-- **Motion type** — linear motion (LIN)  
+- **Motion type** — `PTP` / `LIN`  
 - **Conditional logic** — `IF IN x = TRUE/FALSE`  
 - **Condition timing** — evaluate conditions **BEFORE** or **AFTER** a waypoint  
 - **Output actions** — activate or deactivate digital outputs  
 - **Gripper actions** — open or close the gripper  
 - **Execution flow** — run, stop, resume, clear, or remove waypoints  
-
-
-## Automatic jig-placement workflow
-
-![Automatic jig placement GUI](assets/screenshots/automatic_jig_placement_gui.png)
 
 ➡️ **[Open the full project gallery](docs/GALLERY.md)**
 
@@ -390,81 +385,133 @@ The digital model includes:
 
 ---
 
-## Automatic jig placement
+## Automatic Jig Placement
 
-This is the most advanced application layer in the project.
+The **Automatic Jig Placement** system is the highest-level application layer in the project. It combines workcell-state discovery, jig selection, runtime IK, robot motion, simulated grasping, placement validation, and repeatable full-table execution.
+
+<p align="center">
+  <img src="assets/screenshots/automatic_jig_placement_gui.png" alt="Automatic Jig Placement Interface" width="58%">
+</p>
+
+### Target discovery & jig matching
+
+The interface discovers free target frames at runtime, identifies the required jig family from the target name, and searches for an unused matching jig.
 
 ```text
-Search free target TFs
+L1 → LARGE jig
+M1 → MEDIUM jig
+M2 → MEDIUM jig
+S1 → SMALL jig
+```
+
+Targets are discovered from TF frame names ending in `_target_link` rather than relying only on a fixed coordinate list. The GUI then exposes the selected target, required jig type, selected jig model, jig coordinates, target-center coordinates, and TCP distance before enabling automatic execution.
+
+### Runtime IK & branch selection
+
+The controller does not depend on one prerecorded joint pose for every target. For pickup and placement poses it computes IK at runtime and evaluates several candidate branches:
+
+```text
+Target TCP pose
+      ↓
+Generate multiple IK seeds
+      ↓
+Call MoveIt IK
+      ↓
+Collect valid joint solutions
+      ↓
+Compare wrapped joint deltas
+      ↓
+Penalize excessive wrist motion
+      ↓
+Choose the lowest-motion candidate
+      ↓
+Execute through the PTP path
+```
+
+This multi-seed approach was introduced after mathematically valid IK solutions produced unnecessary wrist flips. The scoring logic gives additional weight to wrist motion so the selected branch is more practical from the current robot state.
+
+### Automatic execution
+
+The GUI provides both **single-placement** and **full-table** execution. A complete cycle is:
+
+```text
+Discover/select free target
         ↓
 Infer required jig size
         ↓
 Find unused matching jig
         ↓
-Compute runtime IK
+Move above pickup
         ↓
-Choose best IK branch
+Descend
         ↓
-Move to pickup
-        ↓
-Grip + attach
+Close gripper + attach jig
         ↓
 Lift and transfer
         ↓
-Place + detach
+Move above target
         ↓
-Validate
+Descend
+        ↓
+Open gripper + detach
+        ↓
+Validate placement
         ↓
 Mark jig used + target occupied
         ↓
-Continue automatically
+Retract and continue
 ```
 
-Example targets:
+The **FULL RUN – COMPLETE TABLE** mode repeats this process automatically for the remaining free targets without requiring manual reselection between placements.
 
-```text
-L1 -> LARGE jig
-M1 -> MEDIUM jig
-M2 -> MEDIUM jig
-S1 -> SMALL jig
-```
+### Jig inventory & target occupancy
 
-Targets are discovered dynamically from TF frame names ending in `_target_link` rather than relying only on a hard-coded coordinate list.
-
-➡️ **[Automatic jig-placement architecture](docs/AUTOMATIC_JIG_PLACEMENT.md)**
-
----
-
-## Runtime inverse kinematics
-
-The autonomous system uses MoveIt's IK service at runtime.
-
-A target can have several valid joint solutions, and the first mathematical solution is not necessarily a good robot motion. During development, some valid solutions produced large wrist flips.
-
-The controller therefore:
-
-1. tries multiple generic IK seeds,
-2. collects valid candidates,
-3. computes wrapped joint deltas from the current state,
-4. weights wrist motion more strongly,
-5. selects the lowest-motion candidate.
-
-This solved the wrist-branch problem generically instead of adding target-specific joint hacks.
-
----
-
-## Full-table autonomy & immediate STOP / RESUME
-
-Two state trackers make repeatable full-table execution possible:
+Two independent state trackers prevent incorrect repeated operations:
 
 ```python
 placed_jig_models
 filled_placement_targets
 ```
 
-They prevent both reusing a jig that has already been placed and sending another jig to an occupied target.
+`placed_jig_models` prevents a physical jig that has already been placed from being selected again. `filled_placement_targets` prevents a second jig from being sent to an occupied target.
 
-The automatic STOP path was upgraded from a simple software flag into actual motion interruption: it cancels both the active MoveIt sequence goal and the active arm-controller trajectory. RESUME retries the interrupted automatic step from the robot's current state.
+This distinction became important during multi-target runs because a previously placed jig could otherwise become the nearest matching jig during a later scan.
+
+### Simulated grasping & stable detach
+
+Jig grasping is simulated with the **IFRA LinkAttacher** plugin. During pickup the gripper closes and the nearest valid jig is attached. During release, detach requests are queued and executed from Gazebo's update thread rather than directly from a ROS service callback.
+
+That threading change solved a native `gzserver` crash that occurred during repeated release operations.
+
+### Placement validation
+
+A placement is only considered complete after the release operation has been validated. Only then are the used-jig inventory and occupied-target state updated before the controller proceeds to the next target.
+
+### Immediate STOP / RESUME
+
+The automatic workflow supports genuine motion interruption. **STOP** cancels both the active MoveIt sequence goal and the active arm-controller `FollowJointTrajectory` goal, allowing the robot to stop during motion rather than merely setting a software flag.
+
+**RESUME** retries the interrupted automatic step from the robot's current state.
+
+### Demonstrated in simulation
+
+The final workcell demonstrated:
+
+- dynamic target discovery,
+- automatic jig-size inference,
+- unused-jig matching,
+- runtime multi-seed IK,
+- wrist-aware branch selection,
+- simulated pickup and attachment,
+- transfer and release,
+- placement validation,
+- jig inventory tracking,
+- target occupancy tracking,
+- single-target execution,
+- full-table automatic execution,
+- immediate STOP / RESUME.
+
+➡️ **[Read the full Automatic Jig Placement documentation](docs/AUTOMATIC_JIG_PLACEMENT.md)**
 
 ---
 
