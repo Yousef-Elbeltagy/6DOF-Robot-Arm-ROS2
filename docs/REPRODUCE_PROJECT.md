@@ -51,17 +51,41 @@ sudo rosdep init
 rosdep update
 ```
 
-## 2. Create the workspace
+If `rosdep init` reports that it was already initialized, continue with `rosdep update`.
+
+## 2. Clone the repository as the workspace
+
+The repository root already contains `src/`, `scripts/`, `config/`, and the project documentation. Clone the repository itself as the workspace:
 
 ```bash
-mkdir -p ~/robot_arm_ws
+cd ~
+git clone https://github.com/Yousef-Elbeltagy/6DOF-Robot-Arm-ROS2.git robot_arm_ws
 cd ~/robot_arm_ws
-git clone https://github.com/Yousef-Elbeltagy/6DOF-Robot-Arm-ROS2.git src
 ```
 
-The repository is already organized so that its ROS packages live under `src/`.
+The resulting layout should look like:
+
+```text
+~/robot_arm_ws/
+├── src/
+├── scripts/
+├── config/
+├── docs/
+└── README.md
+```
+
+Do not clone the complete repository inside `~/robot_arm_ws/src`, because that creates a nested `src/src` layout and breaks the documented helper-script paths.
 
 ## 3. Install package dependencies
+
+Recommended:
+
+```bash
+cd ~/robot_arm_ws
+bash scripts/setup_dependencies.sh
+```
+
+Equivalent rosdep command:
 
 ```bash
 source /opt/ros/humble/setup.bash
@@ -69,7 +93,18 @@ cd ~/robot_arm_ws
 rosdep install --from-paths src --ignore-src -r -y --rosdistro humble
 ```
 
+`warehouse_ros_mongo` is intentionally not required by this repository. It is optional MoveIt warehouse functionality and is not needed for the normal planning, simulation, sequence, or jig-placement workflows documented here.
+
 ## 4. Build
+
+Recommended:
+
+```bash
+cd ~/robot_arm_ws
+bash scripts/build_workspace.sh
+```
+
+Equivalent manual build:
 
 ```bash
 cd ~/robot_arm_ws
@@ -77,6 +112,8 @@ source /opt/ros/humble/setup.bash
 colcon build --symlink-install
 source install/setup.bash
 ```
+
+The public repository has been validated by building all project packages from its own `src/` tree.
 
 ## 5. Restore runtime configuration
 
@@ -107,17 +144,19 @@ Do not replace that value with the shorter `link_6 -> gripper_base` offset; they
 Run:
 
 ```bash
-bash ~/robot_arm_ws/scripts/check_system.sh
+cd ~/robot_arm_ws
+bash scripts/check_system.sh
 ```
 
-Fix any reported missing dependency before launching the full system.
+Fix any reported missing dependency before launching the full system. On the validated development machine, the public environment check completed with all checks passing.
 
 ## 7. Launch the project
 
 The convenience launcher starts Gazebo, waits for both arm and gripper controllers, starts MoveIt, opens RViz, then launches the Tkinter GUI:
 
 ```bash
-bash ~/robot_arm_ws/scripts/start_robot.sh
+cd ~/robot_arm_ws
+bash scripts/start_robot.sh
 ```
 
 Expected major components:
@@ -130,6 +169,8 @@ arm_controller
 gripper_controller
 Robot GUI
 ```
+
+The public repository was also launch-tested after a clean build: Gazebo, MoveIt, RViz, the GUI, robot model, and controllers all started correctly.
 
 ## 8. Verify a successful launch
 
@@ -195,7 +236,11 @@ small_jig_urdf
 IFRA_LinkAttacher
 ```
 
-## 11. What is reproduced
+## 11. Mechanical source files
+
+The public `cad/` directory contains both native SolidWorks archives and neutral STEP exports. See [../cad/README.md](../cad/README.md) for the CAD package map and interoperability notes.
+
+## 12. What is reproduced
 
 This repository reproduces the simulation and control prototype, including:
 
@@ -212,8 +257,8 @@ This repository reproduces the simulation and control prototype, including:
 - simulated attach/detach,
 - full-table automation logic.
 
-It does not reproduce a commissioned physical industrial robot. Hardware integration, calibration, safety engineering, and certification remain future work.
+It does not reproduce a commissioned physical industrial robot. Hardware integration, calibration, safety engineering, certification, and production commissioning remain future work.
 
-## 12. If something fails
+## 13. If something fails
 
 See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) before changing coordinates, IK logic, controller timing, or attach/detach behavior.
