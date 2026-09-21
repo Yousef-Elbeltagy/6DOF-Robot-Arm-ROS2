@@ -8,6 +8,9 @@ Third-party components retain their original licenses and attribution notices.
 Notably:
 
 - `src/IFRA_LinkAttacher/` contains software originating from IFRA-Group, Cranfield University and includes its own Apache-2.0 license and copyright notice.
-- Other vendored or adapted dependencies should be redistributed with their original license files intact.
+- `src/pymoveit2/` contains the PyMoveIt2 project, Copyright (c) 2022 Andrej Orsula, distributed under the BSD 3-Clause License included in that subtree.
+- Other vendored or adapted dependencies should be redistributed with their original license files and attribution notices intact.
+
+The native SolidWorks and neutral STEP files under `cad/` are published as project mechanical-source assets; third-party components represented within assemblies remain subject to any applicable original rights or licenses.
 
 This project is a simulation-validated engineering prototype and is not a certified industrial or collaborative-robot safety system.
