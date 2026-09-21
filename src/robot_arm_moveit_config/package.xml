@@ -42,8 +42,10 @@
   <exec_depend>rviz_common</exec_depend>
   <exec_depend>rviz_default_plugins</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
-  <exec_depend>warehouse_ros_mongo</exec_depend>
 
+  <!-- warehouse_ros_mongo is optional and not required for normal planning,
+       simulation, sequence execution, or automatic jig placement. It is not
+       available as a binary package in every ROS 2 Humble apt configuration. -->
 
   <export>
       <build_type>ament_cmake</build_type>
